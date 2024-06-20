@@ -8,13 +8,15 @@
 #include <vector>
 
 namespace maze {
+/// A enum to represent directions in a cartesian style
 enum class Direction { Up, Down, Left, Right, None };
+/// Data structure that represents a cartesian coordinate
 struct Position {
     size_t coord_x;
     size_t coord_y;
     /// Constructor
     Position(size_t x, size_t y) : coord_x(x), coord_y(y) {}
-    /// Assing overload
+    /// Assign overload
     Position &operator=(const Position &rhs) {
         if (this != &rhs) {
             coord_x = rhs.coord_x;
@@ -39,7 +41,7 @@ struct Position {
             Position(1, 0)}; //!< Up, Down, Left, Right
         return *this + directions[(size_t)dir];
     }
-    /// Less than overload
+    /// 'less than' overload
     bool operator<(const Position &other) const {
         return coord_x < other.coord_x or
                (coord_x == other.coord_x and coord_y < other.coord_y);
@@ -52,8 +54,12 @@ struct Position {
         }
     };
 };
+
+/// The class that represents a maze as an array, and offers a interface to work
+/// like a puzzle manager.
 class Maze {
   public:
+    /// Struct that represents what a element of maze array represents
     enum class Cell {
         Free = 0,
         Wall,
@@ -61,12 +67,10 @@ class Maze {
         Finish,
         Path,
     };
-
     /// Constructor
     Maze(const std::string &filename);
     /// Copy Constructor
     Maze(const Maze &rhs) = default;
-
     /// Return the height of the Maze
     size_t height() const { return m_height; }
     /// Return the width of the Maze
@@ -81,25 +85,26 @@ class Maze {
         return pos == m_finish;
     }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
-    /// position is acessible or not
+    /// position is acessible or not.
     bool blocked(const Position &pos, const Direction &dir) const {
         auto move = pos + dir;
         return in_bound(move) and
                m_maze[move.coord_y][move.coord_x] == Cell::Wall;
     }
-    /// Converts the maze into a readable string
+    /// Method to print the Maze, without highlighting his position.
     [[nodiscard]] std::string str() const;
-    /// Method to print the Solution of the Maze
+    /// Method to print the Maze, with his solution highlighted.
     [[nodiscard]] std::string str(std::list<Direction> &solution) const;
 
   private:
-    std::vector<std::vector<Cell>> m_maze;
-    size_t m_height;
-    size_t m_width;
-    Position m_start;
-    Position m_finish;
+    std::vector<std::vector<Cell>> m_maze; //!< The actual Maze
+    size_t m_height; //!< The height of the maze array, i.e. his number of rows.
+    size_t m_width;  //!< The width of the maze array, i.e. his number of lines.
+    Position m_start;  //!< Where is the start position of the maze puzzle.
+    Position m_finish; //!< Where is the end to be found of the maze puzzle.
 
-    /// For initializing the maze
+    /// Resizes every row of the maze array, it's used as an auxiliary for
+    /// Constructing a object of this class.
     void resize_maze() {
         m_maze.resize(m_height);
         for (auto &row : m_maze) {
