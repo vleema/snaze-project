@@ -1,3 +1,5 @@
+#include "maze.hpp"
+
 #include <fstream>
 #include <istream>
 #include <list>
@@ -8,8 +10,6 @@
 #include <utility>
 
 #include "color.h"
-#include "maze.hpp"
-
 
 namespace {
 std::optional<std::ifstream> open_file(const std::string &filename) {
@@ -29,7 +29,7 @@ read_array_dimensions(const std::string &line) {
 }
 } // namespace
 
-namespace maze {
+namespace snaze {
 Maze::Maze(const std::string &filename) : m_start(0, 0), m_finish(0, 0) {
     auto file = open_file(filename);
     if (not file.has_value())
@@ -103,4 +103,4 @@ std::string Maze::str(std::list<Direction> &solution) const {
     }
     return maze_copy.str();
 }
-} // namespace maze
+} // namespace snaze
