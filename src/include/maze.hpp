@@ -7,7 +7,12 @@
 #include <string>
 #include <vector>
 
-namespace maze {
+// TODO: Add 'invisible walls' field for Cell enum
+//  - Do the necessary changes in Maze constructor to support this changes
+// TODO: Change symbols for maze in file to '#' (wall), '-' (invisible wall), '
+// ' (Free), 'S' (Start), 'F' (Finish)
+
+namespace snaze {
 /// A enum to represent directions in a cartesian style
 enum class Direction { Up, Down, Left, Right, None };
 /// Data structure that represents a cartesian coordinate
@@ -112,5 +117,5 @@ class Maze {
         }
     }
 };
-} // namespace maze
+} // namespace snaze
 #endif // !MAZE_HPP
