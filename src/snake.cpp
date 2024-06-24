@@ -2,7 +2,7 @@
 #include "maze.hpp"
 
 namespace snaze {
-SnakeBot::MaybeDirList SnakeBot::solve(const Maze &maze) {
+SnakeBot::MaybeDirectionList SnakeBot::solve(const Maze &maze) {
     std::queue<Position> to_visit;
     std::unordered_set<Position, Position::Hash> visited;
     std::map<Position, Direction> came_from;

@@ -13,11 +13,11 @@
 namespace snaze {
 class SnakeBot {
   public:
-    using MaybeDirList = std::optional<std::list<Direction>>;
+    using MaybeDirectionList = std::optional<std::list<Direction>>;
     using PositionUSet = std::unordered_set<Position, Position::Hash>;
 
     /// Method to solve the maze
-    static MaybeDirList solve(const Maze &maze);
+    static MaybeDirectionList solve(const Maze &maze);
 
     /// Method to print the solution from start to finish
     static std::string str(const Maze &maze, std::list<Direction> &solution);
