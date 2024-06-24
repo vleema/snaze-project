@@ -10,7 +10,10 @@
 // TODO: Add 'invisible walls' field for Cell enum
 //  - Do the necessary changes in Maze constructor to support this changes
 // TODO: Change symbols for maze in file to '#' (wall), '-' (invisible wall), '
-// ' (Free), 'S' (Start), 'F' (Finish)
+// ' (Free), 'S' (Start), 'F' (Food)
+// TODO: Represent the snake in some way here
+//  - By that i mean a way to change the start position
+//  - And if it's this class responsability, print the snake in some way
 
 namespace snaze {
 /// A enum to represent directions in a cartesian style
@@ -69,7 +72,7 @@ class Maze {
         Free = 0,
         Wall,
         Start,
-        Finish,
+        Food,
         Path,
     };
     /// Constructor

@@ -11,6 +11,7 @@
 #include "maze.hpp"
 
 namespace snaze {
+/// Class responsible for finding the shortest path to the finish
 class SnakeBot {
   public:
     using MaybeDirectionList = std::optional<std::list<Direction>>;
@@ -38,7 +39,7 @@ class SnakeBot {
             return Direction::None;
         }
     }
-    /// Method to reconstruct the shorter path from start to finish
+    /// Method to reconstruct the shorter path from start to the food position
     static std::list<Direction>
     reconstruct_path(std::map<Position, Direction> &came_from, Position start,
                      Position end) {

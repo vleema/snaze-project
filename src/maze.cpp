@@ -56,7 +56,7 @@ Maze::Maze(const std::string &filename) : m_start(0, 0), m_finish(0, 0) {
             auto cell = (Maze::Cell)(ch - '0');
             if (cell == Maze::Cell::Start)
                 m_start = Position(col_count, line_count);
-            if (cell == Maze::Cell::Finish)
+            if (cell == Maze::Cell::Food)
                 m_finish = Position(col_count, line_count);
             m_maze[line_count][col_count++] = cell;
         }
@@ -68,7 +68,7 @@ std::string Maze::str() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
     constexpr char start[] = "Σ";
-    constexpr char finish[] = "Ω";
+    constexpr char food[] = "🥚";
     constexpr char path[] = "█";
     std::ostringstream oss;
     for (const auto &row : m_maze) {
@@ -79,8 +79,8 @@ std::string Maze::str() const {
                 oss << Color::tcolor(wall, Color::GREEN);
             else if (cell == Cell::Start)
                 oss << Color::tcolor(start, Color::YELLOW);
-            else if (cell == Cell::Finish)
-                oss << Color::tcolor(finish, Color::MAGENTA);
+            else if (cell == Cell::Food)
+                oss << Color::tcolor(food, Color::MAGENTA);
             else if (cell == Cell::Path)
                 oss << Color::tcolor(path, Color::RED);
         }
@@ -88,7 +88,7 @@ std::string Maze::str() const {
     }
     oss << '\n'
         << Color::tcolor(start, Color::YELLOW) << " - Start\n"
-        << Color::tcolor(finish, Color::MAGENTA) << " - Finish\n";
+        << Color::tcolor(food, Color::MAGENTA) << " - Finish\n";
     return oss.str();
 }
 
@@ -99,7 +99,7 @@ std::string Maze::str(std::list<Direction> &solution) const {
     for (const auto &dir : solution) {
         current_pos = current_pos + dir;
         maze_copy.m_maze[current_pos.coord_y][current_pos.coord_x] =
-            (current_pos != m_finish) ? Cell::Path : Cell::Finish;
+            (current_pos != m_finish) ? Cell::Path : Cell::Food;
     }
     return maze_copy.str();
 }
