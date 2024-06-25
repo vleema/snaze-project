@@ -53,6 +53,35 @@ class SnazeManager {
     std::vector<std::string>
         m_game_levels_files; //!<- A list containing all the game levels
 
+    // Render related variables and methods
+    std::string m_screen_title;
+    std::string m_main_content;
+    std::string m_system_msg;
+    std::string m_interaction_msg;
+
+    /* All screens may have up to 4 components:
+     *  (1) title,
+     *  (2) main content,
+     *  (3) a system message,
+     *  (4) an interaction message.
+     */
+    /// Gets the m_screen_title variable value
+    std::string screen_title() const;
+    /// Gets the m_main_content variable value
+    std::string main_content() const;
+    /// Gets the m_system_msg variable value
+    std::string system_msg() const;
+    /// Gets the m_interaction_msg variable value
+    std::string interaction_msg() const;
+    /// Sets the m_screen_title variable value
+    void screen_title(std::string new_screen_title);
+    /// Sets the m_main_content variable value
+    void main_content(std::string new_main_content);
+    /// Sets the m_system_msg variable value
+    void system_msg(std::string new_system_msg);
+    /// Sets the m_interaction_msg variable value
+    void interaction_msg(std::string new_interaction_msg);
+
   public:
     /// Constructor
     SnazeManager(const std::string &game_levels_directory,
