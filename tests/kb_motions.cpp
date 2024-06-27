@@ -4,14 +4,16 @@
 #include <termios.h> // struct termios
 #include <thread>    // std::this_thread::sleep_for
 #include <unistd.h>  // system("clear")
+#include <vector>
 
 // Define the initial position of the player
+
 int playerX = 10;
 int playerY = 10;
 
 constexpr int WIDTH = 40, HEIGHT = 20;
 
-enum Direction { UP, DOWN, LEFT, RIGHT };
+enum Direction { UP = 'w', DOWN = 's', LEFT = 'a', RIGHT = 'd' };
 Direction player_direction = RIGHT;
 
 struct termios orig_termios;
@@ -104,6 +106,14 @@ void update() {
     }
 }
 int main() {
+    draw();
+    set_terminal_mode();
+    auto initial_input = getch();
+    while (initial_input < 0) {
+        initial_input = getch();
+    }
+    player_direction = (Direction)initial_input;
+    reset_terminal_mode();
     while (true) {
         set_terminal_mode();
         input();
