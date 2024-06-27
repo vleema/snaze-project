@@ -70,12 +70,25 @@ SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
     return (MainMenuOption)choice;
 }
 
+SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
+    int choice = 0;
+    std::cin >> choice;
+    if (std::cin.fail() or choice < (int)SnazeMode::Player or choice > (int)SnazeMode::Bot) {
+        cin_clear();
+        system_msg("Invalid option, try again");
+        return SnazeMode::Undefined;
+    }
+    return (SnazeMode)choice;
+}
+
 void SnazeManager::process() {
     if (m_snaze_state == SnazeState::Init) {
     } else if (m_snaze_state == SnazeState::MainMenu) {
         m_menu_option = read_menu_option();
     } else if (m_snaze_state == SnazeState::Quit) {
         m_asked_to_quit = read_yes_no_confirmation(true);
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        m_snaze_mode = read_snaze_option();
     } else {
         read_enter_to_proceed();
     }
@@ -86,7 +99,7 @@ void SnazeManager::process() {
 
 void SnazeManager::change_state_by_selected_menu_option() {
     const std::unordered_map<MainMenuOption, SnazeState> states{
-        {MainMenuOption::Play, SnazeState::GameStart}, {MainMenuOption::Quit, SnazeState::Quit}};
+        {MainMenuOption::Play, SnazeState::SnazeMode}, {MainMenuOption::Quit, SnazeState::Quit}};
     auto temp_game_state = states.find(m_menu_option);
     m_snaze_state = (temp_game_state != states.cend()) ? temp_game_state->second : m_snaze_state;
 }
@@ -99,8 +112,11 @@ void SnazeManager::update() {
         m_snaze_state = SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::MainMenu) {
         change_state_by_selected_menu_option();
+        m_menu_option = MainMenuOption::Undefined;
     } else if (m_snaze_state == SnazeState::Quit) {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        m_snaze_state = SnazeState::GameStart;
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
@@ -154,19 +170,30 @@ std::string SnazeManager::main_menu_mc() const {
     return oss.str();
 }
 
+std::string SnazeManager::snaze_mode_mc() const {
+    std::ostringstream oss;
+    oss << "[1] - Normal\n"
+        << "[2] - Bot\n\n";
+    return oss.str();
+}
+
 void SnazeManager::render() {
     clear_screen();
     if (m_snaze_state == SnazeState::MainMenu) {
-        screen_title("Main Menu");
+        screen_title("Snaze Game 🐍");
         main_content(main_menu_mc());
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::Quit) {
         screen_title("Quitting");
         main_content("Do you want to quit the snaze game? ");
         interaction_msg("[Y/n]");
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        screen_title("Snaze Mode");
+        main_content(snaze_mode_mc());
+        interaction_msg("Select one option and press enter");
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
-        main_content("Sorry that function isn't implemented yet 😓\n");
+        main_content("Sorry that function isn't implemented yet 😓\n\n");
         interaction_msg("Press <Enter> to go back");
     }
     if (not m_screen_title.empty()) {

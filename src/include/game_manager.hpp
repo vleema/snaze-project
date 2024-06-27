@@ -42,7 +42,7 @@ class SnazeManager {
     };
     /// Enum that represents the mode that snaze will be played
     enum class SnazeMode {
-        Player,
+        Player = 1,
         Bot,
         Undefined,
     };
