@@ -18,8 +18,7 @@ class Parser {
     using IniUMap = std::unordered_map<Section, std::unordered_map<Var, Value>>;
 
     /// Search for a file a maybe return the address a maybe return the address
-    [[nodiscard]] static std::optional<std::string>
-    find_file(const std::string &file_name);
+    [[nodiscard]] static std::optional<std::string> find_file(const std::string &file_name);
     /**
      * @brief Parses an INI file and returns a map of its sections and key-value
      * pairs.

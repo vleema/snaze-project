@@ -9,7 +9,7 @@
 
 // TODO: Add 'invisible walls' field for Cell enum
 //  - Do the necessary changes in Maze constructor to support this changes
-// TODO: Change symbols for maze in file to '#' (wall), '-' (invisible wall), '
+// FIX: Change symbols for maze in file to '#' (wall), '-' (invisible wall), '
 // ' (Free), 'S' (Start), 'F' (Food)
 // TODO: Represent the snake in some way here
 //  - By that i mean a way to change the start position
@@ -22,6 +22,7 @@ enum class Direction { Up, Down, Left, Right, None };
 struct Position {
     size_t coord_x;
     size_t coord_y;
+    Position() = default;
     /// Constructor
     Position(size_t x, size_t y) : coord_x(x), coord_y(y) {}
     /// Assign overload
@@ -44,21 +45,19 @@ struct Position {
     }
     /// Overload to go in certain direction
     Position operator+(const Direction &dir) const {
-        const std::array<Position, 4> directions = {
-            Position(0, 1), Position(0, -1), Position(-1, 0),
-            Position(1, 0)}; //!< Up, Down, Left, Right
+        const std::array<Position, 4> directions = {Position(0, 1), Position(0, -1),
+                                                    Position(-1, 0),
+                                                    Position(1, 0)}; //!< Up, Down, Left, Right
         return *this + directions[(size_t)dir];
     }
     /// 'less than' overload
     bool operator<(const Position &other) const {
-        return coord_x < other.coord_x or
-               (coord_x == other.coord_x and coord_y < other.coord_y);
+        return coord_x < other.coord_x or (coord_x == other.coord_x and coord_y < other.coord_y);
     }
     /// Hasher overload
     struct Hash {
         size_t operator()(const Position &pos) const {
-            return std::hash<size_t>()(pos.coord_x) ^
-                   std::hash<size_t>()(pos.coord_y);
+            return std::hash<size_t>()(pos.coord_x) ^ std::hash<size_t>()(pos.coord_y);
         }
     };
 };
@@ -76,6 +75,7 @@ class Maze {
         Path,
     };
     /// Constructor
+    Maze() { resize_maze(); }
     Maze(const std::string &filename);
     /// Copy Constructor
     Maze(const Maze &rhs) = default;
@@ -89,15 +89,12 @@ class Maze {
     }
     [[nodiscard]] Position start() const { return m_start; }
     /// Given a Position `pos` tells if `pos` is the finish or not
-    [[nodiscard]] bool found_finish(const Position &pos) const {
-        return pos == m_finish;
-    }
+    [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_finish; }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
     /// position is acessible or not.
     bool blocked(const Position &pos, const Direction &dir) const {
         auto move = pos + dir;
-        return in_bound(move) and
-               m_maze[move.coord_y][move.coord_x] == Cell::Wall;
+        return in_bound(move) and m_maze[move.coord_y][move.coord_x] == Cell::Wall;
     }
     /// Method to print the Maze, without highlighting his position.
     [[nodiscard]] std::string str() const;
@@ -106,10 +103,10 @@ class Maze {
 
   private:
     std::vector<std::vector<Cell>> m_maze; //!< The actual Maze
-    size_t m_height; //!< The height of the maze array, i.e. his number of rows.
-    size_t m_width;  //!< The width of the maze array, i.e. his number of lines.
-    Position m_start;  //!< Where is the start position of the maze puzzle.
-    Position m_finish; //!< Where is the end to be found of the maze puzzle.
+    size_t m_height{10}; //!< The height of the maze array, i.e. his number of rows.
+    size_t m_width{10};  //!< The width of the maze array, i.e. his number of lines.
+    Position m_start;    //!< Where is the start position of the maze puzzle.
+    Position m_finish;   //!< Where is the end to be found of the maze puzzle.
 
     /// Resizes every row of the maze array, it's used as an auxiliary for
     /// Constructing a object of this class.

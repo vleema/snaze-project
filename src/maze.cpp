@@ -18,8 +18,8 @@ std::optional<std::ifstream> open_file(const std::string &filename) {
         return std::nullopt;
     return ifs_file;
 }
-std::optional<std::pair<size_t, size_t>>
-read_array_dimensions(const std::string &line) {
+
+std::optional<std::pair<size_t, size_t>> read_array_dimensions(const std::string &line) {
     std::istringstream iss(line);
     size_t height, width;
     iss >> height >> width;
@@ -41,8 +41,7 @@ Maze::Maze(const std::string &filename) : m_start(0, 0), m_finish(0, 0) {
         if (first_line) {
             auto dimensions = read_array_dimensions(file_line);
             if (not dimensions.has_value())
-                throw std::invalid_argument(
-                    "Failed in reading header for maze file");
+                throw std::invalid_argument("Failed in reading header for maze file");
             m_height = dimensions.value().first;
             m_width = dimensions.value().second;
             resize_maze();

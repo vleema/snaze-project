@@ -19,10 +19,11 @@ class SnazeManager {
     struct Settings {
         size_t fps;
         size_t lives;
-        size_t n_foods;
+        size_t food_amount;
     };
     /// Enum that represents the possibles game states
     enum class SnazeState {
+        Init,
         MainMenu,
         SnazeMode,
         GameStart,
@@ -35,23 +36,24 @@ class SnazeManager {
     /// Enum that represents the possible options that can be selected in Main
     /// Menu
     enum class MainMenuOption {
-        Play,
+        Play = 1,
         Quit,
+        Undefined,
     };
     /// Enum that represents the mode that snaze will be played
     enum class SnazeMode {
         Player,
         Bot,
+        Undefined,
     };
 
-    SnazeState m_snaze_state; //!< The current state of the SnazeManager
-    SnazeMode m_snaze_mode;   //!< How the snaze will be played
-    Settings m_settings;      //!< Snaze running opts
-    bool m_game_over;         //!< Boolean to tell if the game as ended or not
-    SnakeBot m_snake_bot;     //!< A bot that autoplays the game
-    Maze m_maze;              //!< Representation of the maze
-    std::vector<std::string>
-        m_game_levels_files; //!<- A list containing all the game levels
+    // Back-end related
+    SnazeState m_snaze_state{SnazeState::Init};   //!< The current state of the SnazeManager
+    Settings m_settings;                          //!< Snaze running opts
+    bool m_game_over;                             //!< Boolean to tell if the game as ended or not
+    SnakeBot m_snake_bot;                         //!< A bot that autoplays the game
+    Maze m_maze;                                  //!< Representation of the maze
+    std::vector<std::string> m_game_levels_files; //!<- A list containing all the game levels
 
     // Render related variables and methods
     std::string m_screen_title;
@@ -60,10 +62,10 @@ class SnazeManager {
     std::string m_interaction_msg;
 
     /* All screens may have up to 4 components:
-     *  (1) title,
-     *  (2) main content,
-     *  (3) a system message,
-     *  (4) an interaction message.
+     *  (1) title (st),
+     *  (2) main content (mc),
+     *  (3) a system message (sm), used for errors in process
+     *  (4) an interaction message (im).
      */
     /// Gets the m_screen_title variable value
     std::string screen_title() const;
@@ -81,17 +83,37 @@ class SnazeManager {
     void system_msg(std::string new_system_msg);
     /// Sets the m_interaction_msg variable value
     void interaction_msg(std::string new_interaction_msg);
+    /// The main menu screen of the snaze
+    std::string main_menu_mc() const;
+    /// Quit screen
+    std::string quit_mc() const;
+    /// SnazeMode screen
+    std::string snaze_mode_mc() const;
+
+    // Process related variables and methods
+    SnazeMode m_snaze_mode{SnazeMode::Undefined}; //!< How the snaze will be played
+    MainMenuOption m_menu_option{
+        MainMenuOption::Undefined}; //!< The selected menu option in Main menu state
+    bool m_asked_to_quit{false};
+    /// Reads the user main menu selected option
+    MainMenuOption read_menu_option();
+    /// Reads the user SnazeMode selected option
+    SnazeMode read_snaze_option();
+
+    // Update related variables and methods
+    void change_state_by_selected_menu_option();
 
   public:
     /// Constructor
-    SnazeManager(const std::string &game_levels_directory,
-                 const std::string &ini_config_path);
+    SnazeManager(const std::string &game_levels_directory, const std::string &ini_config_path);
     /// Function to process user o bot inputs
     void process();
     /// Function to update the snaze state
     void update();
     /// Function to display graphical things in the screen
-    void render() const;
+    void render();
+    /// Function that tells if the game will quit or not
+    bool quit() { return m_asked_to_quit; }
 };
 } // namespace snaze
 
