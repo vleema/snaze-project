@@ -2,12 +2,9 @@
 #define TERMINAL_UTILS_H
 
 #include <stdlib.h>
-#include <string.h>
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h>
-
-extern struct termios orig_termios;
 
 /**
  * @brief Resets the terminal to its original state.
@@ -15,7 +12,7 @@ extern struct termios orig_termios;
  * This function restores the terminal settings to the state they were in
  * before the program was started, typically used when exiting the program.
  */
-inline void reset_terminal_mode() { tcsetattr(0, TCSANOW, &orig_termios); }
+void reset_terminal_mode();
 
 /**
  * @brief Sets the terminal to raw mode.
@@ -25,14 +22,7 @@ inline void reset_terminal_mode() { tcsetattr(0, TCSANOW, &orig_termios); }
  * saves the original terminal settings and registers a function to
  * restore them at exit.
  */
-inline void set_terminal_mode() {
-    struct termios new_termios;
-    tcgetattr(0, &orig_termios);
-    memcpy(&new_termios, &orig_termios, sizeof(new_termios));
-    atexit(reset_terminal_mode);
-    cfmakeraw(&new_termios);
-    tcsetattr(0, TCSANOW, &new_termios);
-}
+void set_terminal_mode();
 
 /**
  * @brief Checks if a key has been pressed.
@@ -43,13 +33,7 @@ inline void set_terminal_mode() {
  *
  * @return int Non-zero if a key has been pressed, zero otherwise.
  */
-inline int kbhit() {
-    struct timeval tv = {0L, 0L};
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(0, &fds);
-    return select(1, &fds, NULL, NULL, &tv);
-}
+int kbhit();
 
 /**
  * @brief Gets the pressed key.
@@ -60,14 +44,6 @@ inline int kbhit() {
  *
  * @return int The character read, or a negative value if an error occurs.
  */
-inline int getch() {
-    int r;
-    unsigned char c;
-    if ((r = read(0, &c, sizeof(c))) < 0) {
-        return r;
-    } else {
-        return c;
-    }
-}
+int getch();
 
 #endif // !TERMINAL_UTILS_H
