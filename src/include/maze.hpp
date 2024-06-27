@@ -7,17 +7,9 @@
 #include <string>
 #include <vector>
 
-// TODO: Add 'invisible walls' field for Cell enum
-//  - Do the necessary changes in Maze constructor to support this changes
-// FIX: Change symbols for maze in file to '#' (wall), '-' (invisible wall), '
-// ' (Free), 'S' (Start), 'F' (Food)
-// TODO: Represent the snake in some way here
-//  - By that i mean a way to change the start position
-//  - And if it's this class responsability, print the snake in some way
-
 namespace snaze {
 /// A enum to represent directions in a cartesian style
-enum class Direction { Up, Down, Left, Right, None };
+enum class Direction { Up = 'w', Down = 's', Left = 'a', Right = 'd', None };
 /// Data structure that represents a cartesian coordinate
 struct Position {
     size_t coord_x;
@@ -68,10 +60,11 @@ class Maze {
   public:
     /// Struct that represents what a element of maze array represents
     enum class Cell {
-        Free = 0,
-        Wall,
+        Free = ' ',
+        Wall = '#',
+        InvisibleWall = '.',
         Start,
-        Food,
+        Food = '&',
         Path,
     };
     /// Constructor
@@ -89,7 +82,7 @@ class Maze {
     }
     [[nodiscard]] Position start() const { return m_start; }
     /// Given a Position `pos` tells if `pos` is the finish or not
-    [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_finish; }
+    [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_food; }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
     /// position is acessible or not.
     bool blocked(const Position &pos, const Direction &dir) const {
@@ -106,7 +99,7 @@ class Maze {
     size_t m_height{10}; //!< The height of the maze array, i.e. his number of rows.
     size_t m_width{10};  //!< The width of the maze array, i.e. his number of lines.
     Position m_start;    //!< Where is the start position of the maze puzzle.
-    Position m_finish;   //!< Where is the end to be found of the maze puzzle.
+    Position m_food;     //!< Where is the end to be found of the maze puzzle.
 
     /// Resizes every row of the maze array, it's used as an auxiliary for
     /// Constructing a object of this class.

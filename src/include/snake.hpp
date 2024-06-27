@@ -1,6 +1,7 @@
 #ifndef SNAKE_HPP
 #define SNAKE_HPP
 
+#include <deque>
 #include <list>
 #include <map>
 #include <optional>
@@ -11,6 +12,10 @@
 #include "maze.hpp"
 
 namespace snaze {
+struct Snake {
+    std::deque<Position> body;
+    Direction head_direction{Direction::None};
+};
 /// Class responsible for finding the shortest path to the finish
 class SnakeBot {
   public:
@@ -40,9 +45,8 @@ class SnakeBot {
         }
     }
     /// Method to reconstruct the shorter path from start to the food position
-    static std::list<Direction>
-    reconstruct_path(std::map<Position, Direction> &came_from, Position start,
-                     Position end) {
+    static std::list<Direction> reconstruct_path(std::map<Position, Direction> &came_from,
+                                                 Position start, Position end) {
         std::list<Direction> path;
         Position current = end;
         while (current != start) {
@@ -52,13 +56,11 @@ class SnakeBot {
         return path;
     }
     /// Method to verify that a Position was already visited
-    static bool already_visited(const Position &pos,
-                                const PositionUSet &visited) {
+    static bool already_visited(const Position &pos, const PositionUSet &visited) {
         return visited.find(pos) != visited.cend();
     }
     /// Method to visit a position and save that o Solver variables
-    static void visit_position(const Position &pos,
-                               std::queue<Position> &to_visit,
+    static void visit_position(const Position &pos, std::queue<Position> &to_visit,
                                PositionUSet &visited) {
         to_visit.push(pos);
         visited.insert(pos);

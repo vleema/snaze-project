@@ -30,7 +30,7 @@ std::optional<std::pair<size_t, size_t>> read_array_dimensions(const std::string
 } // namespace
 
 namespace snaze {
-Maze::Maze(const std::string &filename) : m_start(0, 0), m_finish(0, 0) {
+Maze::Maze(const std::string &filename) : m_start(0, 0), m_food(0, 0) {
     auto file = open_file(filename);
     if (not file.has_value())
         throw std::invalid_argument("Couldn't open file: " + filename);
@@ -50,13 +50,9 @@ Maze::Maze(const std::string &filename) : m_start(0, 0), m_finish(0, 0) {
         }
         size_t col_count = 0;
         for (const auto &ch : file_line) {
-            if (ch == ' ' or ch == '\n')
-                continue;
-            auto cell = (Maze::Cell)(ch - '0');
-            if (cell == Maze::Cell::Start)
-                m_start = Position(col_count, line_count);
+            auto cell = (Maze::Cell)ch;
             if (cell == Maze::Cell::Food)
-                m_finish = Position(col_count, line_count);
+                m_food = Position(col_count, line_count);
             m_maze[line_count][col_count++] = cell;
         }
         line_count++;
@@ -72,7 +68,7 @@ std::string Maze::str() const {
     std::ostringstream oss;
     for (const auto &row : m_maze) {
         for (const auto &cell : row) {
-            if (cell == Cell::Free)
+            if (cell == Cell::Free or cell == Cell::InvisibleWall)
                 oss << free;
             else if (cell == Cell::Wall)
                 oss << Color::tcolor(wall, Color::GREEN);
@@ -98,7 +94,7 @@ std::string Maze::str(std::list<Direction> &solution) const {
     for (const auto &dir : solution) {
         current_pos = current_pos + dir;
         maze_copy.m_maze[current_pos.coord_y][current_pos.coord_x] =
-            (current_pos != m_finish) ? Cell::Path : Cell::Food;
+            (current_pos != m_food) ? Cell::Path : Cell::Food;
     }
     return maze_copy.str();
 }

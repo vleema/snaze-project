@@ -1,6 +1,7 @@
 #ifndef GAME_MANAGER_HPP
 #define GAME_MANAGER_HPP
 
+#include "maze.hpp"
 #include "snake.hpp"
 #include <string>
 #include <vector>
@@ -52,6 +53,7 @@ class SnazeManager {
     Settings m_settings;                          //!< Snaze running opts
     bool m_game_over;                             //!< Boolean to tell if the game as ended or not
     SnakeBot m_snake_bot;                         //!< A bot that autoplays the game
+    Snake m_snake;                                //!< The actual snake that are being moved
     Maze m_maze;                                  //!< Representation of the maze
     std::vector<std::string> m_game_levels_files; //!<- A list containing all the game levels
 
@@ -97,8 +99,10 @@ class SnazeManager {
     bool m_asked_to_quit{false};
     /// Reads the user main menu selected option
     MainMenuOption read_menu_option();
-    /// Reads the user SnazeMode selected option
+    /// Reads the user SnazeModeselected option
     SnazeMode read_snaze_option();
+    /// Reads starting direction, when the game starts
+    Direction read_starting_direction() const;
 
     // Update related variables and methods
     void change_state_by_selected_menu_option();

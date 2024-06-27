@@ -1,6 +1,8 @@
 #include "game_manager.hpp"
 #include "color.h"
 #include "ini_file_parser.h"
+#include "maze.hpp"
+#include "terminal_utils.h"
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -81,6 +83,15 @@ SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
     return (SnazeMode)choice;
 }
 
+Direction SnazeManager::read_starting_direction() const {
+    set_terminal_mode();
+    auto start_direction = getch();
+    while (start_direction < 0)
+        start_direction = getch();
+    reset_terminal_mode();
+    return (Direction)start_direction;
+}
+
 void SnazeManager::process() {
     if (m_snaze_state == SnazeState::Init) {
     } else if (m_snaze_state == SnazeState::MainMenu) {
@@ -89,12 +100,12 @@ void SnazeManager::process() {
         m_asked_to_quit = read_yes_no_confirmation(true);
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_mode = read_snaze_option();
+    } else if (m_snaze_state == SnazeState::GameStart) {
+        m_snake.head_direction = read_starting_direction();
     } else {
         read_enter_to_proceed();
     }
-    // TODO:
-    // - SnazeMode
-    // - GameLoop
+    // TODO: process, GameLoop
 }
 
 void SnazeManager::change_state_by_selected_menu_option() {
@@ -117,9 +128,12 @@ void SnazeManager::update() {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_state = SnazeState::GameStart;
+        /// TODO: Load a random maze from the maze list
+        /// TODO: Generate a starting position for the snake
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
+    /// TODO: update, GameLoop
 }
 
 void SnazeManager::screen_title(std::string new_screen_title) {
@@ -191,11 +205,14 @@ void SnazeManager::render() {
         screen_title("Snaze Mode");
         main_content(snaze_mode_mc());
         interaction_msg("Select one option and press enter");
+    } else if (m_snaze_state == SnazeState::GameStart) {
+        // TODO: Render the maze, showing the spawn position
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
         interaction_msg("Press <Enter> to go back");
     }
+    // TODO: Render, GameLoop
     if (not m_screen_title.empty()) {
         std::cout << screen_title();
         m_screen_title.clear();
