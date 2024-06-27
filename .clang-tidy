@@ -1,0 +1,15 @@
+Checks: "*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        -fuchsia-*,
+        -google-*,
+        -llvm*,
+        -modernize-use-trailing-return-type,
+        -hicpp-avoid-c-arrays,
+        -cppcoreguidelines-*
+        -zircon-*,
+"
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle: LLVM

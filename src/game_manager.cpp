@@ -4,6 +4,7 @@
 #include "maze.hpp"
 #include "terminal_utils.h"
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
@@ -18,14 +19,17 @@ std::vector<std::string> get_files_from_directory(const std::string &dir_name) {
     namespace fs = std::filesystem;
     fs::path dir_path = dir_name;
     std::vector<std::string> file_list;
-    if (not fs::is_directory(dir_path))
+    if (not fs::is_directory(dir_path)) {
         throw std::invalid_argument(dir_name + " Is not a directory");
-    for (const auto &entry : fs::directory_iterator(dir_name))
-        if (fs::is_regular_file(entry))
+    }
+    for (const auto &entry : fs::directory_iterator(dir_name)) {
+        if (fs::is_regular_file(entry)) {
             file_list.emplace_back(entry.path().string());
+        }
+    }
     return file_list;
 }
-bool read_yes_no_confirmation(bool yes_preferred) {
+bool read_yes_no_confirmation(/* bool yes_preffered */) {
     // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
     // "no"
     string choice;
@@ -83,11 +87,12 @@ SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
     return (SnazeMode)choice;
 }
 
-Direction SnazeManager::read_starting_direction() const {
+Direction SnazeManager::read_starting_direction() {
     set_terminal_mode();
     auto start_direction = getch();
-    while (start_direction < 0)
+    while (start_direction < 0) {
         start_direction = getch();
+    }
     reset_terminal_mode();
     return (Direction)start_direction;
 }
@@ -97,7 +102,7 @@ void SnazeManager::process() {
     } else if (m_snaze_state == SnazeState::MainMenu) {
         m_menu_option = read_menu_option();
     } else if (m_snaze_state == SnazeState::Quit) {
-        m_asked_to_quit = read_yes_no_confirmation(true);
+        m_asked_to_quit = read_yes_no_confirmation();
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_mode = read_snaze_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
@@ -116,9 +121,9 @@ void SnazeManager::change_state_by_selected_menu_option() {
 }
 
 void SnazeManager::update() {
-    if (not m_system_msg.empty())
+    if (not m_system_msg.empty()) {
         return;
-
+    }
     if (m_snaze_state == SnazeState::Init) {
         m_snaze_state = SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::MainMenu) {
@@ -128,8 +133,11 @@ void SnazeManager::update() {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_state = SnazeState::GameStart;
-        /// TODO: Load a random maze from the maze list
-        /// TODO: Generate a starting position for the snake
+        // Picking a random level
+        auto random_idx = rand() % m_game_levels_files.size();
+        m_maze = Maze(m_game_levels_files[random_idx]);
+        m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
+        /// TODO: Generate a food position
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
@@ -177,14 +185,14 @@ std::string SnazeManager::interaction_msg() const {
     return oss.str();
 }
 
-std::string SnazeManager::main_menu_mc() const {
+std::string SnazeManager::main_menu_mc() {
     std::ostringstream oss;
     oss << "[1] - Play\n"
         << "[2] - Quit\n\n";
     return oss.str();
 }
 
-std::string SnazeManager::snaze_mode_mc() const {
+std::string SnazeManager::snaze_mode_mc() {
     std::ostringstream oss;
     oss << "[1] - Normal\n"
         << "[2] - Bot\n\n";

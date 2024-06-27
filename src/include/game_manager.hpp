@@ -50,8 +50,8 @@ class SnazeManager {
 
     // Back-end related
     SnazeState m_snaze_state{SnazeState::Init};   //!< The current state of the SnazeManager
-    Settings m_settings;                          //!< Snaze running opts
-    bool m_game_over;                             //!< Boolean to tell if the game as ended or not
+    Settings m_settings{};                        //!< Snaze running opts
+    bool m_game_over{false};                      //!< Boolean to tell if the game as ended or not
     SnakeBot m_snake_bot;                         //!< A bot that autoplays the game
     Snake m_snake;                                //!< The actual snake that are being moved
     Maze m_maze;                                  //!< Representation of the maze
@@ -70,13 +70,13 @@ class SnazeManager {
      *  (4) an interaction message (im).
      */
     /// Gets the m_screen_title variable value
-    std::string screen_title() const;
+    [[nodiscard]] std::string screen_title() const;
     /// Gets the m_main_content variable value
-    std::string main_content() const;
+    [[nodiscard]] std::string main_content() const;
     /// Gets the m_system_msg variable value
-    std::string system_msg() const;
+    [[nodiscard]] std::string system_msg() const;
     /// Gets the m_interaction_msg variable value
-    std::string interaction_msg() const;
+    [[nodiscard]] std::string interaction_msg() const;
     /// Sets the m_screen_title variable value
     void screen_title(std::string new_screen_title);
     /// Sets the m_main_content variable value
@@ -86,11 +86,11 @@ class SnazeManager {
     /// Sets the m_interaction_msg variable value
     void interaction_msg(std::string new_interaction_msg);
     /// The main menu screen of the snaze
-    std::string main_menu_mc() const;
+    [[nodiscard]] static std::string main_menu_mc();
     /// Quit screen
-    std::string quit_mc() const;
+    [[nodiscard]] static std::string quit_mc();
     /// SnazeMode screen
-    std::string snaze_mode_mc() const;
+    [[nodiscard]] static std::string snaze_mode_mc();
 
     // Process related variables and methods
     SnazeMode m_snaze_mode{SnazeMode::Undefined}; //!< How the snaze will be played
@@ -102,7 +102,7 @@ class SnazeManager {
     /// Reads the user SnazeModeselected option
     SnazeMode read_snaze_option();
     /// Reads starting direction, when the game starts
-    Direction read_starting_direction() const;
+    [[nodiscard]] static Direction read_starting_direction();
 
     // Update related variables and methods
     void change_state_by_selected_menu_option();
@@ -117,7 +117,7 @@ class SnazeManager {
     /// Function to display graphical things in the screen
     void render();
     /// Function that tells if the game will quit or not
-    bool quit() { return m_asked_to_quit; }
+    [[nodiscard]] bool quit() const { return m_asked_to_quit; }
 };
 } // namespace snaze
 

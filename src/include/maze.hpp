@@ -67,11 +67,14 @@ class Maze {
         Food,
         Path,
     };
-    /// Constructor
+    /// Construct empty maze
     Maze() { resize_maze(); }
+    /// Constructor with filename
     Maze(const std::string &filename);
     /// Copy Constructor
     Maze(const Maze &rhs) = default;
+    /// Assign operator
+    Maze &operator=(const Maze &rhs) = default;
     /// Return the height of the Maze
     size_t height() const { return m_height; }
     /// Return the width of the Maze
@@ -96,10 +99,11 @@ class Maze {
 
   private:
     std::vector<std::vector<Cell>> m_maze; //!< The actual Maze
-    size_t m_height{10}; //!< The height of the maze array, i.e. his number of rows.
-    size_t m_width{10};  //!< The width of the maze array, i.e. his number of lines.
-    Position m_spawn;    //!< Where is the start position of the maze puzzle.
-    Position m_food;     //!< Where is the end to be found of the maze puzzle.
+    size_t m_height{10};                //!< The height of the maze array, i.e. his number of rows.
+    size_t m_width{10};                 //!< The width of the maze array, i.e. his number of lines.
+    Position m_spawn;                   //!< Where is the start position of the maze puzzle.
+    Position m_food;                    //!< Where is the end to be found of the maze puzzle.
+    std::vector<Position> m_free_cells; //!< Used for more efficiently generating a food position
 
     /// Resizes every row of the maze array, it's used as an auxiliary for
     /// Constructing a object of this class.
