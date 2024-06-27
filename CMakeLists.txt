@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
-project (Snaze VERSION 1.0.0 LANGUAGES CXX )
+project(Snaze VERSION 1.0.0 LANGUAGES CXX)
 
 # Enable compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#=== SETTING VARIABLES ===#
+#=== SETTING VARIABLES === #
 set(APP_NAME "snaze")
-set(INCLUDE_DIR "src/include")
+set(INCLUDE_DIR "src/include" "lib/include")
 set(COMPILE_OPTIONS ${CMAKE_CXX_FLAGS} "-Wall" "-pedantic" "-g3")
 
 # Set sources
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "lib/*.cpp")
 
 # Include directories
 include_directories(${INCLUDE_DIR})

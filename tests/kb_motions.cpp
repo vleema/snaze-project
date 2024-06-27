@@ -9,7 +9,7 @@
 int playerX = 10;
 int playerY = 10;
 
-constexpr int WIDTH = 20, HEIGHT = 20;
+constexpr int WIDTH = 40, HEIGHT = 20;
 
 enum Direction { UP, DOWN, LEFT, RIGHT };
 Direction player_direction = RIGHT;
@@ -69,20 +69,16 @@ void input() {
     if (kbhit()) { // Check if a key has been pressed
         switch (getch()) {
         case 'w':
-            player_direction =
-                (player_direction != DOWN) ? UP : player_direction;
+            player_direction = (player_direction != DOWN) ? UP : player_direction;
             break;
         case 's':
-            player_direction =
-                (player_direction != UP) ? DOWN : player_direction;
+            player_direction = (player_direction != UP) ? DOWN : player_direction;
             break;
         case 'a':
-            player_direction =
-                (player_direction != RIGHT) ? LEFT : player_direction;
+            player_direction = (player_direction != RIGHT) ? LEFT : player_direction;
             break;
         case 'd':
-            player_direction =
-                (player_direction != LEFT) ? RIGHT : player_direction;
+            player_direction = (player_direction != LEFT) ? RIGHT : player_direction;
             break;
         case 'q': // Press 'q' to quit the game
             exit(0);
@@ -97,13 +93,13 @@ void update() {
         playerY = (playerY > 0) ? playerY - 1 : playerY;
         break;
     case DOWN:
-        playerY = (playerY < WIDTH - 1) ? playerY + 1 : playerY;
+        playerY = (playerY < HEIGHT - 1) ? playerY + 1 : playerY;
         break;
     case LEFT:
-        playerX = (playerX > 0) ? playerX - 1 : playerX;
+        playerX = (playerX > 0) ? playerX - 2 : playerX;
         break;
     case RIGHT:
-        playerX = (playerX < HEIGHT - 1) ? playerX + 1 : playerX;
+        playerX = (playerX < WIDTH - 1) ? playerX + 2 : playerX;
         break;
     }
 }
