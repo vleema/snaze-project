@@ -7,7 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #=== SETTING VARIABLES === #
 set(APP_NAME "snaze")
 set(INCLUDE_DIR "src/include" "lib/include")
-set(COMPILE_OPTIONS ${CMAKE_CXX_FLAGS} "-Wall" "-pedantic" "-g3")
+set(DEBUG_COMPILE_OPTIONS "-Wall" "-pedantic" "-g3" "-O0")
+set(RELEASE_COMPILE_OPTIONS "-O3" "-DNDEBUG")
 
 # Set sources
 file(GLOB SOURCES "src/*.cpp" "lib/*.cpp")
@@ -15,14 +16,16 @@ file(GLOB SOURCES "src/*.cpp" "lib/*.cpp")
 # Include directories
 include_directories(${INCLUDE_DIR})
 
-# Set compiler flags
-add_compile_options(${COMPILE_OPTIONS})
-
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #=== Main App ===
 
-# Create executable
-add_executable(${APP_NAME} ${SOURCES})
+# Create debug executable
+add_executable(${APP_NAME}_debug ${SOURCES})
+target_compile_options(${APP_NAME}_debug PRIVATE ${DEBUG_COMPILE_OPTIONS})
+
+# Create release executable
+add_executable(${APP_NAME}_release ${SOURCES})
+target_compile_options(${APP_NAME}_release PRIVATE ${RELEASE_COMPILE_OPTIONS})
