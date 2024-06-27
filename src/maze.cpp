@@ -30,7 +30,7 @@ std::optional<std::pair<size_t, size_t>> read_array_dimensions(const std::string
 } // namespace
 
 namespace snaze {
-Maze::Maze(const std::string &filename) : m_start(0, 0), m_food(0, 0) {
+Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
     auto file = open_file(filename);
     if (not file.has_value())
         throw std::invalid_argument("Couldn't open file: " + filename);
@@ -51,18 +51,20 @@ Maze::Maze(const std::string &filename) : m_start(0, 0), m_food(0, 0) {
         size_t col_count = 0;
         for (const auto &ch : file_line) {
             auto cell = (Maze::Cell)ch;
-            if (cell == Maze::Cell::Food)
-                m_food = Position(col_count, line_count);
+            if (cell == Maze::Cell::Spawn)
+                m_spawn = Position(col_count, line_count);
             m_maze[line_count][col_count++] = cell;
         }
         line_count++;
     }
+    // FIX: Error treatment for problematic levels
+    // TODO: Functionality to read a file with multiple levels
 }
 
 std::string Maze::str() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
-    constexpr char start[] = "Σ";
+    constexpr char spawn[] = "🌀";
     constexpr char food[] = "🥚";
     constexpr char path[] = "█";
     std::ostringstream oss;
@@ -72,8 +74,8 @@ std::string Maze::str() const {
                 oss << free;
             else if (cell == Cell::Wall)
                 oss << Color::tcolor(wall, Color::GREEN);
-            else if (cell == Cell::Start)
-                oss << Color::tcolor(start, Color::YELLOW);
+            else if (cell == Cell::Spawn)
+                oss << Color::tcolor(spawn, Color::YELLOW);
             else if (cell == Cell::Food)
                 oss << Color::tcolor(food, Color::MAGENTA);
             else if (cell == Cell::Path)
@@ -82,8 +84,8 @@ std::string Maze::str() const {
         oss << '\n';
     }
     oss << '\n'
-        << Color::tcolor(start, Color::YELLOW) << " - Start\n"
-        << Color::tcolor(food, Color::MAGENTA) << " - Finish\n";
+        << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
+        << Color::tcolor(food, Color::MAGENTA) << " - Food\n";
     return oss.str();
 }
 

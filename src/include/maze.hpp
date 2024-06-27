@@ -63,8 +63,8 @@ class Maze {
         Free = ' ',
         Wall = '#',
         InvisibleWall = '.',
-        Start,
-        Food = '&',
+        Spawn = '&',
+        Food,
         Path,
     };
     /// Constructor
@@ -80,7 +80,7 @@ class Maze {
     [[nodiscard]] bool in_bound(const Position &pos) const {
         return (pos.coord_y < m_height and pos.coord_x < m_width);
     }
-    [[nodiscard]] Position start() const { return m_start; }
+    [[nodiscard]] Position start() const { return m_spawn; }
     /// Given a Position `pos` tells if `pos` is the finish or not
     [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_food; }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
@@ -98,7 +98,7 @@ class Maze {
     std::vector<std::vector<Cell>> m_maze; //!< The actual Maze
     size_t m_height{10}; //!< The height of the maze array, i.e. his number of rows.
     size_t m_width{10};  //!< The width of the maze array, i.e. his number of lines.
-    Position m_start;    //!< Where is the start position of the maze puzzle.
+    Position m_spawn;    //!< Where is the start position of the maze puzzle.
     Position m_food;     //!< Where is the end to be found of the maze puzzle.
 
     /// Resizes every row of the maze array, it's used as an auxiliary for
