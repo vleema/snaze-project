@@ -133,11 +133,10 @@ void SnazeManager::update() {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_state = SnazeState::GameStart;
-        // Picking a random level
+        // NOTE: Picking a random level
         auto random_idx = rand() % m_game_levels_files.size();
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
-        /// TODO: Generate a food position
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }

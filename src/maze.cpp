@@ -55,9 +55,11 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
         }
         size_t col_count = 0;
         for (const auto &chr : file_line) {
-            auto cell = (Maze::Cell)chr;
-            if (cell == Maze::Cell::Spawn) {
+            auto cell = (Cell)chr;
+            if (cell == Cell::Spawn) {
                 m_spawn = Position(col_count, line_count);
+            } else if (cell == Cell::Free) {
+                m_free_cells.emplace_back(line_count, col_count);
             }
             m_maze[line_count][col_count++] = cell;
         }
@@ -70,7 +72,7 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
 std::string Maze::str() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
-    constexpr char spawn[] = "🌀";
+    constexpr char spawn[] = "꩜";
     constexpr char food[] = "🥚";
     constexpr char path[] = "█";
     std::ostringstream oss;
@@ -106,5 +108,10 @@ std::string Maze::str(std::list<Direction> &solution) const {
             (current_pos != m_food) ? Cell::Path : Cell::Food;
     }
     return maze_copy.str();
+}
+
+void Maze::random_food_position() {
+    m_food = m_free_cells[rand() % m_free_cells.size()];
+    m_maze[m_food.coord_y][m_food.coord_x] = Cell::Food;
 }
 } // namespace snaze

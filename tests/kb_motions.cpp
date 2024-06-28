@@ -98,10 +98,10 @@ void update() {
         playerY = (playerY < HEIGHT - 1) ? playerY + 1 : playerY;
         break;
     case LEFT:
-        playerX = (playerX > 0) ? playerX - 2 : playerX;
+        playerX = (playerX > 0) ? playerX - 1 : playerX;
         break;
     case RIGHT:
-        playerX = (playerX < WIDTH - 1) ? playerX + 2 : playerX;
+        playerX = (playerX < WIDTH - 1) ? playerX + 1 : playerX;
         break;
     }
 }

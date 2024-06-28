@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) {
     snaze::SnazeManager snaze("assets/", "conf/snaze_config.ini");
-    snaze::Maze debug_maze("assets/level0.dat");
+    snaze::Maze debug_maze("assets/level4.dat");
     std::cout << debug_maze.str();
     // while (not snaze.quit()) {
     //     snaze.process();

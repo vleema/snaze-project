@@ -6,8 +6,9 @@ Checks: "*,
         -google-*,
         -llvm*,
         -modernize-use-trailing-return-type,
-        -hicpp-avoid-c-arrays,
-        -cppcoreguidelines-*
+        -hicpp-*
+        -cppcoreguidelines-*,
+        -readability-indentifier-length,
         -zircon-*,
 "
 WarningsAsErrors: ''

@@ -1,7 +1,7 @@
 #ifndef TERMINAL_UTILS_H
 #define TERMINAL_UTILS_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h>

@@ -6,12 +6,6 @@
 #include <string>
 #include <vector>
 
-/*
- * TODO: Represent the snake in some way in the maze
- * TODO: Impl kb_motions so that a player can play, there's a test file for that
- * `tests/kb_motions.cpp`
- */
-
 namespace snaze {
 /// Class keeps track of the Snaze as whole, and follows GameLoop design
 /// pattern: https://gameprogrammingpatterns.com/game-loop.html

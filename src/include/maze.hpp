@@ -14,6 +14,7 @@ enum class Direction { Up = 'w', Down = 's', Left = 'a', Right = 'd', None };
 struct Position {
     size_t coord_x;
     size_t coord_y;
+    /// Default constructor
     Position() = default;
     /// Constructor
     Position(size_t x, size_t y) : coord_x(x), coord_y(y) {}
@@ -33,7 +34,7 @@ struct Position {
     bool operator!=(const Position &rhs) const { return not(*this == rhs); }
     /// (+) overload
     Position operator+(const Position &rhs) const {
-        return Position(coord_x + rhs.coord_x, coord_y + rhs.coord_y);
+        return {coord_x + rhs.coord_x, coord_y + rhs.coord_y};
     }
     /// Overload to go in certain direction
     Position operator+(const Direction &dir) const {
@@ -70,15 +71,15 @@ class Maze {
     /// Construct empty maze
     Maze() { resize_maze(); }
     /// Constructor with filename
-    Maze(const std::string &filename);
+    explicit Maze(const std::string &filename);
     /// Copy Constructor
     Maze(const Maze &rhs) = default;
     /// Assign operator
     Maze &operator=(const Maze &rhs) = default;
     /// Return the height of the Maze
-    size_t height() const { return m_height; }
+    [[nodiscard]] size_t height() const { return m_height; }
     /// Return the width of the Maze
-    size_t width() const { return m_width; }
+    [[nodiscard]] size_t width() const { return m_width; }
     /// Given a Position `pos` tells if `pos` is in bounds
     [[nodiscard]] bool in_bound(const Position &pos) const {
         return (pos.coord_y < m_height and pos.coord_x < m_width);
@@ -88,7 +89,7 @@ class Maze {
     [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_food; }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
     /// position is acessible or not.
-    bool blocked(const Position &pos, const Direction &dir) const {
+    [[nodiscard]] bool blocked(const Position &pos, const Direction &dir) const {
         auto move = pos + dir;
         return in_bound(move) and m_maze[move.coord_y][move.coord_x] == Cell::Wall;
     }
@@ -96,13 +97,15 @@ class Maze {
     [[nodiscard]] std::string str() const;
     /// Method to print the Maze, with his solution highlighted.
     [[nodiscard]] std::string str(std::list<Direction> &solution) const;
+    /// Generates a random food position
+    void random_food_position();
 
   private:
     std::vector<std::vector<Cell>> m_maze; //!< The actual Maze
     size_t m_height{10};                //!< The height of the maze array, i.e. his number of rows.
     size_t m_width{10};                 //!< The width of the maze array, i.e. his number of lines.
-    Position m_spawn;                   //!< Where is the start position of the maze puzzle.
-    Position m_food;                    //!< Where is the end to be found of the maze puzzle.
+    Position m_spawn{};                 //!< Where is the start position of the maze puzzle.
+    Position m_food{};                  //!< Where is the end to be found of the maze puzzle.
     std::vector<Position> m_free_cells; //!< Used for more efficiently generating a food position
 
     /// Resizes every row of the maze array, it's used as an auxiliary for
