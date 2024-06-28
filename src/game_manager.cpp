@@ -110,7 +110,7 @@ void SnazeManager::process() {
     } else {
         read_enter_to_proceed();
     }
-    // TODO: process, GameLoop
+    // TODO: process: GameLoop (On, Damage, Game Over, Won)
 }
 
 void SnazeManager::change_state_by_selected_menu_option() {
@@ -140,7 +140,7 @@ void SnazeManager::update() {
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
-    /// TODO: update, GameLoop
+    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
 }
 
 void SnazeManager::screen_title(std::string new_screen_title) {
@@ -213,13 +213,13 @@ void SnazeManager::render() {
         main_content(snaze_mode_mc());
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
-        // TODO: Render the maze, showing the spawn position
+        main_content(m_maze.str()); // HACK: Change to correct maze string method
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
         interaction_msg("Press <Enter> to go back");
     }
-    // TODO: Render, GameLoop
+    // TODO: Render: GameLoop (On, Damage, Game Over, Won)
     if (not m_screen_title.empty()) {
         std::cout << screen_title();
         m_screen_title.clear();
