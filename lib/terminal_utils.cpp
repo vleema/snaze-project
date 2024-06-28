@@ -1,5 +1,9 @@
 #include "terminal_utils.h"
 #include <cstring>
+#include <iostream>
+#include <string>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 struct termios orig_termios;
 
@@ -29,5 +33,23 @@ int getch() {
         return r;
     } else {
         return c;
+    }
+}
+
+int get_terminal_width() {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
+
+void print_centered(const std::string &text) {
+    int terminal_width = get_terminal_width();
+    int text_length = text.length();
+    int padding = (terminal_width - text_length) / 2;
+
+    if (padding > 0) {
+        std::cout << std::string(padding, ' ') << text << std::endl;
+    } else {
+        std::cout << text << std::endl; // Text is too long to center
     }
 }
