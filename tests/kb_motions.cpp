@@ -1,17 +1,24 @@
 #include <chrono>    // std::chrono::milliseconds
+#include <cmath>
 #include <cstring>   // memcpy
+#include <deque>
 #include <iostream>  // std::cout
 #include <termios.h> // struct termios
 #include <thread>    // std::this_thread::sleep_for
 #include <unistd.h>  // system("clear")
 #include <vector>
-
+#include <experimental/random>
 // Define the initial position of the player
 
-int playerX = 10;
-int playerY = 10;
-
 constexpr int WIDTH = 40, HEIGHT = 20;
+
+//Generates random start
+int playerX = std::experimental::randint(0,WIDTH - 1);
+int playerY = std::experimental::randint(0,HEIGHT - 1);
+
+int foodX, foodY;
+
+std::deque<std::pair<int, int>> snake = {{playerX, playerY}};
 
 enum Direction { UP = 'w', DOWN = 's', LEFT = 'a', RIGHT = 'd' };
 Direction player_direction = RIGHT;
@@ -56,13 +63,26 @@ void draw() {
     system("clear"); // Clear the screen
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            if (x == playerX && y == playerY)
+            if (x == playerX && y == playerY) {
                 std::cout << 'P'; // Draw the player
-            else
+            } else if(x == foodX && y == foodY) {
+                std::cout << 'F';
+            } else {
                 std::cout << '.';
+            }
         }
         std::cout << '\n';
         std::cout.flush();
+    }
+}
+
+void generate_food() {
+    foodX = std::experimental::randint(0, WIDTH - 1);
+    foodY = std::experimental::randint(0, HEIGHT - 1);
+
+    while(foodX == playerX && foodY == playerY) {
+        foodX = std::experimental::randint(0, WIDTH - 1);
+        foodY = std::experimental::randint(0, HEIGHT - 1);
     }
 }
 
@@ -90,6 +110,10 @@ void input() {
 
 // Function to update
 void update() {
+    if(playerX == foodX && playerY == foodY) {
+        generate_food();
+    }
+
     switch (player_direction) {
     case UP:
         playerY = (playerY > 0) ? playerY - 1 : playerY;
@@ -106,6 +130,7 @@ void update() {
     }
 }
 int main() {
+    generate_food();
     draw();
     set_terminal_mode();
     auto initial_input = getch();
