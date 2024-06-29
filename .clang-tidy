@@ -6,7 +6,7 @@ Checks: "*,
         -google-*,
         -llvm*,
         -modernize-use-trailing-return-type,
-        -hicpp-*
+        -hicpp-*,
         -cppcoreguidelines-*,
         -readability-indentifier-length,
         -zircon-*,

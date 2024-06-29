@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdio>
+#include <deque>
 #include <list>
 #include <string>
 #include <vector>
@@ -66,7 +67,8 @@ class Maze {
         InvisibleWall = '.',
         Spawn = '&',
         Food,
-        Path,
+        SnakeBody,
+        SnakeHead,
     };
     /// Construct empty maze
     Maze() { resize_maze(); }
@@ -93,14 +95,14 @@ class Maze {
         auto move = pos + dir;
         return in_bound(move) and m_maze[move.coord_y][move.coord_x] == Cell::Wall;
     }
-    /// Method to print the Maze, without highlighting his solution.
-    [[nodiscard]] std::string str() const;
-    /// Method to print the Maze, with his solution highlighted.
-    [[nodiscard]] std::string str(std::list<Direction> &solution) const;
+    /// Method to append the Maze to string, only showing the spawn position
+    [[nodiscard]] std::string str_spawn() const;
+    /// Method to append the Maze to string, showing the snake
+    //  - snake head: ⸯ (vertical), ~ (horizontal)
+    [[nodiscard]] std::string str_in_game(const std::deque<Position> &snake_body,
+                                          const Direction &snake_head_direction) const;
     /// Generates a random food position
     void random_food_position();
-    // TODO: Add new str methods, for game-start, where only shows the spawn and the food location
-    // TODO: Add new str method, for game-on, where it shows the snake body as whole
 
   private:
     std::vector<std::vector<Cell>> m_maze; //!< The actual Maze

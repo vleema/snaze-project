@@ -43,12 +43,14 @@ class SnazeManager {
     };
 
     // Back-end related
-    SnazeState m_snaze_state{SnazeState::Init};   //!< The current state of the SnazeManager
-    Settings m_settings{};                        //!< Snaze running opts
-    bool m_game_over{false};                      //!< Boolean to tell if the game as ended or not
-    SnakeBot m_snake_bot;                         //!< A bot that autoplays the game
-    Snake m_snake;                                //!< The actual snake that are being moved
-    Maze m_maze;                                  //!< Representation of the maze
+    SnazeState m_snaze_state{SnazeState::Init}; //!< The current state of the SnazeManager
+    Settings m_settings{};                      //!< Snaze running opts
+    size_t m_remaining_snake_lives{};           //!< Current game session amount of remaining lives
+    size_t m_eaten_food_amount_snake{};         //!< How much food the snake have already eaten
+    bool m_game_over{false};                    //!< Boolean to tell if the game as ended or not
+    SnakeBot m_snake_bot;                       //!< A bot that autoplays the game
+    Snake m_snake;                              //!< The actual snake that are being moved
+    Maze m_maze;                                //!< Representation of the maze
     std::vector<std::string> m_game_levels_files; //!<- A list containing all the game levels
 
     // Render related variables and methods
@@ -85,6 +87,10 @@ class SnazeManager {
     [[nodiscard]] static std::string quit_mc();
     /// SnazeMode screen
     [[nodiscard]] static std::string snaze_mode_mc();
+    /// It renders the remaining lives and pontuation of the player
+    [[nodiscard]] std::string game_loop_info() const;
+    /// It renders the snake with the maze
+    [[nodiscard]] std::string game_loop_mc() const;
 
     // Process related variables and methods
     SnazeMode m_snaze_mode{SnazeMode::Undefined}; //!< How the snaze will be played

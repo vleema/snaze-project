@@ -1,5 +1,6 @@
 #include "maze.hpp"
 
+#include <deque>
 #include <fstream>
 #include <istream>
 #include <list>
@@ -69,12 +70,11 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
     // TODO: Functionality to read a file with multiple levels
 }
 
-std::string Maze::str() const {
+std::string Maze::str_spawn() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
     constexpr char spawn[] = "꩜";
     constexpr char food[] = "🥚";
-    constexpr char path[] = "█";
     std::ostringstream oss;
     for (const auto &row : m_maze) {
         for (const auto &cell : row) {
@@ -86,8 +86,6 @@ std::string Maze::str() const {
                 oss << Color::tcolor(spawn, Color::YELLOW);
             } else if (cell == Cell::Food) {
                 oss << Color::tcolor(food, Color::MAGENTA);
-            } else if (cell == Cell::Path) {
-                oss << Color::tcolor(path, Color::RED);
             }
         }
         oss << '\n';
@@ -98,16 +96,42 @@ std::string Maze::str() const {
     return oss.str();
 }
 
-std::string Maze::str(std::list<Direction> &solution) const {
-    auto maze_copy(*this);
-    auto current_pos = start();
-
-    for (const auto &dir : solution) {
-        current_pos = current_pos + dir;
-        maze_copy.m_maze[current_pos.coord_y][current_pos.coord_x] =
-            (current_pos != m_food) ? Cell::Path : Cell::Food;
+std::string Maze::str_in_game(const std::deque<Position> &snake_body,
+                              const Direction &snake_head_direction) const {
+    constexpr char wall_or_body[] = "█";
+    constexpr char free = ' ';
+    constexpr char spawn[] = "꩜";
+    constexpr char food[] = "🥚";
+    constexpr char head_v[] = "ⸯ";
+    constexpr char head_h[] = "~";
+    std::ostringstream oss;
+    auto maze_copy(m_maze);
+    for (const auto &part : snake_body) {
+        maze_copy[part.coord_y][part.coord_x] = Cell::SnakeBody;
     }
-    return maze_copy.str();
+    maze_copy[snake_body.front().coord_x][snake_body.front().coord_x] = Cell::SnakeHead;
+    for (const auto &row : maze_copy) {
+        for (const auto &cell : row) {
+            if (cell == Cell::Free or cell == Cell::InvisibleWall) {
+                oss << free;
+            } else if (cell == Cell::Wall) {
+                oss << Color::tcolor(wall_or_body, Color::GREEN);
+            } else if (cell == Cell::Food) {
+                oss << Color::tcolor(food, Color::MAGENTA);
+            } else if (cell == Cell::SnakeHead) {
+                const auto *head_ch = (snake_head_direction == Direction::Up or
+                                       snake_head_direction == Direction::Down)
+                                          ? head_v
+                                          : head_h;
+                oss << Color::tcolor(head_ch, Color::RED);
+            } else if (cell == Cell::SnakeBody) {
+                oss << Color::tcolor(wall_or_body, Color::YELLOW);
+            }
+        }
+        oss << '\n';
+    }
+    oss << '\n';
+    return oss.str();
 }
 
 void Maze::random_food_position() {

@@ -4,8 +4,10 @@
 #include "maze.hpp"
 #include "terminal_utils.h"
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -29,10 +31,10 @@ std::vector<std::string> get_files_from_directory(const std::string &dir_name) {
     }
     return file_list;
 }
-bool read_yes_no_confirmation(/* bool yes_preffered */) {
-    // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
-    // "no"
-    string choice;
+bool read_yes_no_confirmation(/* bool yes_preferred = true */) {
+    // TODO: Add default option functionality
+    // FIX: Handle when user has inputed something other the "y/Y".
+    std::string choice;
     std::cin >> choice;
     std::transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
     return choice == "y";
@@ -133,7 +135,7 @@ void SnazeManager::update() {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_state = SnazeState::GameStart;
-        // NOTE: Picking a random level
+        // Picking a random level
         auto random_idx = rand() % m_game_levels_files.size();
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
@@ -198,6 +200,28 @@ std::string SnazeManager::snaze_mode_mc() {
     return oss.str();
 }
 
+std::string SnazeManager::game_loop_info() const {
+    // ♥︎ ☠
+    constexpr char heart[] = "♥︎";
+    constexpr char skull[] = "☠";
+    std::ostringstream header_oss;
+    std::ostringstream padding_oss;
+    header_oss << "Lives: ";
+    for (size_t i = 0; i < m_remaining_snake_lives; ++i) {
+        header_oss << " " << heart;
+    }
+    for (size_t i = 0; i < m_settings.lives - m_remaining_snake_lives; ++i) {
+        header_oss << " " << skull;
+    }
+    header_oss << " | Score: 0 | Food eaten " << m_eaten_food_amount_snake << " of "
+               << m_settings.food_amount;
+    auto header_str = header_oss.str();
+    padding_oss << std::setw((int)header_str.size()) << std::setfill('-');
+    return header_str;
+}
+
+std::string SnazeManager::game_loop_mc() const { return "hi"; }
+
 void SnazeManager::render() {
     clear_screen();
     if (m_snaze_state == SnazeState::MainMenu) {
@@ -213,7 +237,7 @@ void SnazeManager::render() {
         main_content(snaze_mode_mc());
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
-        main_content(m_maze.str()); // HACK: Change to correct maze string method
+        main_content(m_maze.str_spawn());
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
