@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>    // std::chrono::milliseconds
 #include <cmath>
 #include <cstring>   // memcpy
@@ -10,7 +11,7 @@
 #include <experimental/random>
 // Define the initial position of the player
 
-constexpr int WIDTH = 40, HEIGHT = 20;
+constexpr int WIDTH = 40, HEIGHT = 40;
 
 //Generates random start
 int playerX = std::experimental::randint(0,WIDTH - 1);
@@ -18,7 +19,9 @@ int playerY = std::experimental::randint(0,HEIGHT - 1);
 
 int foodX, foodY;
 
-std::deque<std::pair<int, int>> snake = {{playerX, playerY}};
+std::deque<std::pair<int, int>> snake = {
+  {std::experimental::randint(0,WIDTH - 1), std::experimental::randint(0,HEIGHT - 1) }
+};
 
 enum Direction { UP = 'w', DOWN = 's', LEFT = 'a', RIGHT = 'd' };
 Direction player_direction = RIGHT;
@@ -58,12 +61,17 @@ int getch() {
     }
 }
 
+
 // Function to draw the game state
 void draw() {
+
     system("clear"); // Clear the screen
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            if (x == playerX && y == playerY) {
+            auto has_snake_body = [&](const std::pair<int, int>& p) {
+                return p.first == x && p.second == y;
+            };
+            if (std::any_of(snake.begin(),snake.end(),has_snake_body)) {
                 std::cout << 'P'; // Draw the player
             } else if(x == foodX && y == foodY) {
                 std::cout << 'F';
@@ -80,7 +88,7 @@ void generate_food() {
     foodX = std::experimental::randint(0, WIDTH - 1);
     foodY = std::experimental::randint(0, HEIGHT - 1);
 
-    while(foodX == playerX && foodY == playerY) {
+    while(foodX == snake[0].first && foodY == snake[0].second) {
         foodX = std::experimental::randint(0, WIDTH - 1);
         foodY = std::experimental::randint(0, HEIGHT - 1);
     }
@@ -90,6 +98,7 @@ void generate_food() {
 void input() {
     if (kbhit()) { // Check if a key has been pressed
         switch (getch()) {
+        // TODO: add body avoid as a condition
         case 'w':
             player_direction = (player_direction != DOWN) ? UP : player_direction;
             break;
@@ -110,22 +119,22 @@ void input() {
 
 // Function to update
 void update() {
-    if(playerX == foodX && playerY == foodY) {
+    if(snake[0].first == foodX && snake[0].second == foodY) {
         generate_food();
     }
 
     switch (player_direction) {
     case UP:
-        playerY = (playerY > 0) ? playerY - 1 : playerY;
+        snake[0].second = (snake[0].second > 0) ? snake[0].second - 1 : snake[0].second;
         break;
     case DOWN:
-        playerY = (playerY < HEIGHT - 1) ? playerY + 1 : playerY;
+        snake[0].second = (snake[0].second < HEIGHT - 1) ? snake[0].second+ 1 : snake[0].second;
         break;
     case LEFT:
-        playerX = (playerX > 0) ? playerX - 1 : playerX;
+        snake[0].first = (snake[0].first > 0) ? snake[0].first - 1 : snake[0].first;
         break;
     case RIGHT:
-        playerX = (playerX < WIDTH - 1) ? playerX + 1 : playerX;
+        snake[0].first = (snake[0].first < WIDTH - 1) ? snake[0].first + 1 : snake[0].first ;
         break;
     }
 }
