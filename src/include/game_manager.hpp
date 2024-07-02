@@ -7,15 +7,18 @@
 #include <vector>
 
 namespace snaze {
-/// Class keeps track of the Snaze as whole, and follows GameLoop design
-/// pattern: https://gameprogrammingpatterns.com/game-loop.html
-class SnazeManager {
-    /// Snaze runnings opts that are cone be read from a ini file
-    struct Settings {
+
+/// Snaze runnings opts that are cone be read from a ini file
+struct Settings {
         size_t fps;
         size_t lives;
         size_t food_amount;
-    };
+        std::string player_type;
+};
+
+/// Class keeps track of the Snaze as whole, and follows GameLoop design
+/// pattern: https://gameprogrammingpatterns.com/game-loop.html
+class SnazeManager {
     /// Enum that represents the possibles game states
     enum class SnazeState {
         Init,
