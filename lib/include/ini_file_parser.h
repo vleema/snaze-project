@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include "../../src/include/game_manager.hpp"
 
 namespace ini {
 
@@ -36,7 +37,7 @@ class Parser {
      * @return A map of string to map of string to string, representing the
      * sections and key-value pairs in the INI file.
      */
-    [[nodiscard]] static IniUMap file(const std::string &settings_path);
+    [[nodiscard]] static snaze::Settings file(const std::string &settings_path);
 
   private:
     /// Function to trim leading and trailing whitespaces from a string.

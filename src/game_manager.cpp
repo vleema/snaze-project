@@ -29,6 +29,7 @@ std::vector<std::string> get_files_from_directory(const std::string &dir_name) {
     }
     return file_list;
 }
+
 bool read_yes_no_confirmation(/* bool yes_preffered */) {
     // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
     // "no"
@@ -37,14 +38,17 @@ bool read_yes_no_confirmation(/* bool yes_preffered */) {
     std::transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
     return choice == "y";
 }
+
 void read_enter_to_proceed() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
+
 void cin_clear() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
 void clear_screen() {
 #ifdef _WIN32
     system("cls");
@@ -58,10 +62,7 @@ namespace snaze {
 SnazeManager::SnazeManager(const std::string &game_levels_directory,
                            const std::string &ini_config_file_path) {
     m_game_levels_files = get_files_from_directory(game_levels_directory);
-    auto config_raw = ini::Parser::file(ini_config_file_path);
-    m_settings.fps = std::stoi(config_raw.at("").at("game_fps"));
-    m_settings.lives = std::stoi(config_raw.at("").at("snake_lives"));
-    m_settings.food_amount = std::stoi(config_raw.at("").at("food_amount"));
+    m_settings = ini::Parser::file(ini_config_file_path);
 }
 
 SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
