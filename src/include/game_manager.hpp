@@ -3,6 +3,7 @@
 
 #include "maze.hpp"
 #include "snake.hpp"
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,11 @@ class SnazeManager {
         Bot,
         Undefined,
     };
+
+    // Header info
+    size_t m_lives_remaining;
+    size_t m_score;
+    size_t m_food_eaten;
 
     // Back-end related
     SnazeState m_snaze_state{SnazeState::Init};   //!< The current state of the SnazeManager
@@ -100,9 +106,10 @@ class SnazeManager {
     SnazeMode read_snaze_option();
     /// Reads starting direction, when the game starts
     [[nodiscard]] static Direction read_starting_direction();
-
     // Update related variables and methods
     void change_state_by_selected_menu_option();
+    // Verify if all the levels were played
+    [[nodiscard]] bool still_levels_available();
 
   public:
     /// Constructor

@@ -59,6 +59,11 @@ void clear_screen() {
 } // namespace
 
 namespace snaze {
+
+bool SnazeManager::still_levels_available() {
+    return m_game_levels_files.size() != 0;
+}
+
 SnazeManager::SnazeManager(const std::string &game_levels_directory,
                            const std::string &ini_config_file_path) {
     m_game_levels_files = get_files_from_directory(game_levels_directory);
@@ -80,12 +85,21 @@ SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
 SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
     int choice = 0;
     std::cin >> choice;
-    if (std::cin.fail() or choice < (int)SnazeMode::Player or choice > (int)SnazeMode::Bot) {
+    if (std::cin.fail() or choice == (int)SnazeMode::Player      // Manual
+                        or choice == (int)SnazeMode::Bot         // Computer with backtracking
+                        or choice == (int)SnazeMode::Undefined) { // Computer random
         cin_clear();
         system_msg("Invalid option, try again");
         return SnazeMode::Undefined;
     }
     return (SnazeMode)choice;
+}
+
+void SnazeManager::change_state_by_selected_menu_option() {
+    const std::unordered_map<MainMenuOption, SnazeState> states{
+        {MainMenuOption::Play, SnazeState::SnazeMode}, {MainMenuOption::Quit, SnazeState::Quit}};
+    auto temp_game_state = states.find(m_menu_option);
+    m_snaze_state = (temp_game_state != states.cend()) ? temp_game_state->second : m_snaze_state;
 }
 
 Direction SnazeManager::read_starting_direction() {
@@ -96,52 +110,6 @@ Direction SnazeManager::read_starting_direction() {
     }
     reset_terminal_mode();
     return (Direction)start_direction;
-}
-
-void SnazeManager::process() {
-    if (m_snaze_state == SnazeState::Init) {
-    } else if (m_snaze_state == SnazeState::MainMenu) {
-        m_menu_option = read_menu_option();
-    } else if (m_snaze_state == SnazeState::Quit) {
-        m_asked_to_quit = read_yes_no_confirmation();
-    } else if (m_snaze_state == SnazeState::SnazeMode) {
-        m_snaze_mode = read_snaze_option();
-    } else if (m_snaze_state == SnazeState::GameStart) {
-        m_snake.head_direction = read_starting_direction();
-    } else {
-        read_enter_to_proceed();
-    }
-    // TODO: process: GameLoop (On, Damage, Game Over, Won)
-}
-
-void SnazeManager::change_state_by_selected_menu_option() {
-    const std::unordered_map<MainMenuOption, SnazeState> states{
-        {MainMenuOption::Play, SnazeState::SnazeMode}, {MainMenuOption::Quit, SnazeState::Quit}};
-    auto temp_game_state = states.find(m_menu_option);
-    m_snaze_state = (temp_game_state != states.cend()) ? temp_game_state->second : m_snaze_state;
-}
-
-void SnazeManager::update() {
-    if (not m_system_msg.empty()) {
-        return;
-    }
-    if (m_snaze_state == SnazeState::Init) {
-        m_snaze_state = SnazeState::MainMenu;
-    } else if (m_snaze_state == SnazeState::MainMenu) {
-        change_state_by_selected_menu_option();
-        m_menu_option = MainMenuOption::Undefined;
-    } else if (m_snaze_state == SnazeState::Quit) {
-        m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
-    } else if (m_snaze_state == SnazeState::SnazeMode) {
-        m_snaze_state = SnazeState::GameStart;
-        // NOTE: Picking a random level
-        auto random_idx = rand() % m_game_levels_files.size();
-        m_maze = Maze(m_game_levels_files[random_idx]);
-        m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
-    } else {
-        m_snaze_state = SnazeState::MainMenu;
-    }
-    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
 }
 
 void SnazeManager::screen_title(std::string new_screen_title) {
@@ -197,6 +165,59 @@ std::string SnazeManager::snaze_mode_mc() {
     oss << "[1] - Normal\n"
         << "[2] - Bot\n\n";
     return oss.str();
+}
+
+void SnazeManager::process() {
+    if (m_snaze_state == SnazeState::Init) {
+    } else if (m_snaze_state == SnazeState::MainMenu) {
+        m_menu_option = read_menu_option();
+    } else if (m_snaze_state == SnazeState::Quit) {
+        m_asked_to_quit = read_yes_no_confirmation();
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        m_snaze_mode = read_snaze_option();
+    } else if (m_snaze_state == SnazeState::GameStart) {
+        m_lives_remaining = m_settings.lives;
+        m_score = 0;
+        m_food_eaten = 0;
+
+        m_snake.head_direction = read_starting_direction();
+    } else {
+        read_enter_to_proceed();
+    }
+    // TODO: process: GameLoop (On, Damage, Game Over, Won)
+}
+
+void SnazeManager::update() {
+    if (not m_system_msg.empty()) {
+        return;
+    }
+    if (m_snaze_state == SnazeState::Init) {
+        m_snaze_state = SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::MainMenu) {
+        change_state_by_selected_menu_option();
+        m_menu_option = MainMenuOption::Undefined;
+    } else if (m_snaze_state == SnazeState::Quit) {
+        m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        m_snaze_state = SnazeState::GameStart;
+        // NOTE: Picking a random level
+        if(still_levels_available()) {
+            size_t random_idx = rand() % m_game_levels_files.size();
+            m_maze = Maze(m_game_levels_files[random_idx]);
+            m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
+        } else if(m_lives_remaining > 0){
+            m_snaze_state = SnazeState::Won;
+        }
+    } else if(m_snaze_state == SnazeState::Damage) {
+        if(m_lives_remaining == 0) {
+            m_snaze_state = SnazeState::Lost;
+        } else {
+            --m_lives_remaining;
+        }
+    } else {
+        m_snaze_state = SnazeState::MainMenu;
+    }
+    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
 }
 
 void SnazeManager::render() {
