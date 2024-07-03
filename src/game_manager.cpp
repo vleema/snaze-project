@@ -109,6 +109,15 @@ void SnazeManager::process() {
         m_snaze_mode = read_snaze_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.head_direction = read_starting_direction();
+    } else if (m_snaze_state == SnazeState::On) {
+        // if game mode == Normal:
+        //    set_terminal_mode();
+        //    input(input(), getch());
+        //    reset_terminal_mode();
+        // else if game mode == Bot:
+        //    While solution is not empty:
+        //      input(solution.pop);
+        //      return;
     } else {
         read_enter_to_proceed();
     }
@@ -139,6 +148,17 @@ void SnazeManager::update() {
         auto random_idx = rand() % m_game_levels_files.size();
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
+    } else if (m_snaze_state == SnazeState::On) {
+        // auto temp_position = update_snake_position()
+        // if temp_position get damage:
+        //    m_snaze_state = SnazeState::Damage;
+        // else if temp_position get food:
+        //    score++;
+        //    if ++eaten == m_settings.food_amount:
+        //       m_snaze_state = SnazeState::Won;
+        // if game mode == SnazeMode::Bot
+        //    if solution is empty:
+        //        solution = solve(m_maze);
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
@@ -238,6 +258,9 @@ void SnazeManager::render() {
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
         main_content(m_maze.str_spawn());
+        interaction_msg(R"(Controls: "w" - UP "s" - DOWN "d" - RIGHT "a" - LEFT)");
+    } else if (m_snaze_state == SnazeState::On) {
+        /// TODO: Render Maze with snake, points, lives remaining and foods eaten
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
