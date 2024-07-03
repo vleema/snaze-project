@@ -76,6 +76,8 @@ std::string Maze::str_spawn() const {
     constexpr char spawn[] = "꩜";
     constexpr char food[] = "🥚";
     std::ostringstream oss;
+    oss << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
+        << Color::tcolor(food, Color::MAGENTA) << " - Food\n";
     for (const auto &row : m_maze) {
         for (const auto &cell : row) {
             if (cell == Cell::Free or cell == Cell::InvisibleWall) {
@@ -90,9 +92,6 @@ std::string Maze::str_spawn() const {
         }
         oss << '\n';
     }
-    oss << '\n'
-        << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
-        << Color::tcolor(food, Color::MAGENTA) << " - Food\n";
     return oss.str();
 }
 
