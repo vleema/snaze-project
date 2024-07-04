@@ -1,6 +1,7 @@
 #include "maze.hpp"
 
 #include <deque>
+#include <experimental/random>
 #include <fstream>
 #include <istream>
 #include <optional>
@@ -59,7 +60,7 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
             if (cell == Cell::Spawn) {
                 m_spawn = Position(col_count, line_count);
             } else if (cell == Cell::Free) {
-                m_free_cells.emplace_back(line_count, col_count);
+                m_free_cells.emplace_back(col_count, line_count);
             }
             m_maze[line_count][col_count++] = cell;
         }
@@ -73,7 +74,7 @@ std::string Maze::str_spawn() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
     constexpr char spawn[] = "꩜";
-    constexpr char food[] = "🥚";
+    constexpr char food[] = "◉";
     std::ostringstream oss;
     oss << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
         << Color::tcolor(food, Color::MAGENTA) << " - Food\n";
@@ -98,7 +99,7 @@ std::string Maze::str_in_game(const std::deque<Position> &snake_body,
                               const Direction &snake_head_direction) const {
     constexpr char wall_or_body[] = "█";
     constexpr char free = ' ';
-    constexpr char food[] = "🥚";
+    constexpr char food[] = "◉";
     constexpr char head_v[] = "ⸯ";
     constexpr char head_h[] = "~";
     std::ostringstream oss;
@@ -106,7 +107,7 @@ std::string Maze::str_in_game(const std::deque<Position> &snake_body,
     for (const auto &part : snake_body) {
         maze_copy[part.coord_y][part.coord_x] = Cell::SnakeBody;
     }
-    maze_copy[snake_body.front().coord_x][snake_body.front().coord_x] = Cell::SnakeHead;
+    maze_copy[snake_body.front().coord_y][snake_body.front().coord_x] = Cell::SnakeHead;
     for (const auto &row : maze_copy) {
         for (const auto &cell : row) {
             if (cell == Cell::Free or cell == Cell::InvisibleWall) {
@@ -132,7 +133,8 @@ std::string Maze::str_in_game(const std::deque<Position> &snake_body,
 }
 
 void Maze::random_food_position() {
-    m_food = m_free_cells[rand() % m_free_cells.size()];
+    m_maze[m_food.coord_y][m_food.coord_x] = Cell::Free;
+    m_food = m_free_cells[std::experimental::randint(0, (int)(m_free_cells.size() - 1))];
     m_maze[m_food.coord_y][m_food.coord_x] = Cell::Food;
 }
 } // namespace snaze

@@ -7,12 +7,14 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <experimental/random>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -131,6 +133,7 @@ void SnazeManager::process() {
         m_snaze_mode = read_snaze_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.head_direction = read_starting_direction();
+        m_snake.body.push_back(m_maze.start());
     } else if (m_snaze_state == SnazeState::On) {
         if (m_snaze_mode == SnazeMode::Player) {
             set_terminal_mode();
@@ -141,9 +144,9 @@ void SnazeManager::process() {
         }
         // TODO: Add support for Bot mode
         // else if game mode == Bot:
-        //    While solution is not empty:
-        //      input(solution.pop);
-        //      return;
+        //    if solution is not empty:
+        //      input((char)solution.front());
+        //      solution.pop_front();
     } else {
         read_enter_to_proceed();
     }
@@ -195,23 +198,33 @@ void SnazeManager::update() {
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_state = SnazeState::GameStart;
         // Picking a random level
-        auto random_idx = rand() % m_game_levels_files.size();
+
+        size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size());
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
+        m_remaining_snake_lives = m_settings.lives;
+    } else if (m_snaze_state == SnazeState::GameStart) {
+        m_snaze_state = SnazeState::On;
+        m_maze.random_food_position();
     } else if (m_snaze_state == SnazeState::On) {
+        bool ate = false;
         auto temp_position = update_snake_position();
         if (m_maze.blocked(temp_position, Direction::None) or
             m_snake.is_snake_body(temp_position)) {
             m_snaze_state = SnazeState::Damage;
-        } else if (m_maze.found_food(temp_position)) {
+        } else if (ate = m_maze.found_food(temp_position)) {
             if (++m_eaten_food_amount_snake == m_settings.food_amount) {
                 m_snaze_state = SnazeState::Won;
             }
+            m_maze.random_food_position();
         }
         // TODO: Update: Add support for Bot mode
         // if game mode == SnazeMode::Bot
         //    if solution is empty:
         //        solution = solve(m_maze);
+        if (not ate) {
+            m_snake.body.pop_back();
+        }
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
@@ -283,7 +296,7 @@ std::string SnazeManager::game_loop_info() const {
     for (size_t i = 0; i < m_remaining_snake_lives; ++i) {
         header_oss << " " << heart;
     }
-    for (size_t i = 0; i < m_settings.lives - m_remaining_snake_lives; ++i) {
+    for (size_t i = 0; i < (size_t)(m_settings.lives - m_remaining_snake_lives); ++i) {
         header_oss << " " << skull;
     }
     header_oss << " | Score: 0 | Food eaten " << m_eaten_food_amount_snake << " of "
@@ -344,6 +357,9 @@ void SnazeManager::render() {
     if (not m_interaction_msg.empty()) {
         std::cout << interaction_msg() << std::flush;
         m_interaction_msg.clear();
+    }
+    if (m_snaze_state == SnazeState::On) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / m_settings.fps));
     }
 }
 } // namespace snaze
