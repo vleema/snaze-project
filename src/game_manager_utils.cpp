@@ -1,10 +1,10 @@
-#include "game_manager.hpp"
 #include "color.h"
+#include "game_manager.hpp"
 #include "ini_file_parser.h"
 #include "maze.hpp"
 #include "terminal_utils.h"
+#include "utils.hpp"
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <experimental/random>
@@ -14,48 +14,10 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
 using namespace snaze;
-
-//
-// CLEANING
-//
-void cin_clear() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-
-void clear_screen() {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-}
-
-
-//
-// READING
-//
-bool read_yes_no_confirmation(/* bool yes_preferred = true */) {
-    // TODO: Add default option functionality
-    // FIX: Handle when user has inputed something other the "y/Y".
-    // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
-    // "no"
-    string choice;
-    std::cin >> choice;
-    std::transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
-    return choice == "y";
-}
-
-void read_enter_to_proceed() {
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cin.get();
-}
-
 SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
     int choice = 0;
     std::cin >> choice;
@@ -254,7 +216,7 @@ std::vector<std::string> get_files_from_directory(const std::string &dir_name) {
     return file_list;
 }
 
-bool snaze::SnazeManager::still_levels_available() { return m_game_levels_files.size() != 0; }
+bool SnazeManager::still_levels_available() { return m_game_levels_files.size() != 0; }
 
 SnazeManager::SnazeManager(const std::string &game_levels_directory,
                            const std::string &ini_config_file_path) {
@@ -269,8 +231,7 @@ void SnazeManager::change_state_by_selected_menu_option() {
     m_snaze_state = (temp_game_state != states.cend()) ? temp_game_state->second : m_snaze_state;
 }
 
-
-//read opt
-//confirmations
-//update utils
-//render utils
+// read opt
+// confirmations
+// update utils
+// render utils

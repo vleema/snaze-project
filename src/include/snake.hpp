@@ -16,6 +16,8 @@ namespace snaze {
 struct Snake {
     std::deque<Position> body;
     Direction head_direction{Direction::None};
+    /// Default constructor
+    Snake() = default;
     /// Copy constructor
     Snake(const Snake &rhs) = default;
     /// Method to verify if a position corresponds to the snake body

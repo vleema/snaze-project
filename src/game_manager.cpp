@@ -1,22 +1,14 @@
 #include "game_manager.hpp"
-#include "color.h"
-#include "ini_file_parser.h"
 #include "maze.hpp"
 #include "terminal_utils.h"
-#include "game_manager_utils.cpp"
+#include "utils.hpp"
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <experimental/random>
-#include <filesystem>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <thread>
-#include <unordered_map>
 #include <vector>
 
 namespace snaze {
