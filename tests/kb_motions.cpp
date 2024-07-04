@@ -8,7 +8,6 @@
 #include <termios.h> // struct termios
 #include <thread>    // std::this_thread::sleep_for
 #include <unistd.h>  // system("clear")
-#include <vector>
 
 // Define the initial position of the player
 constexpr int WIDTH = 40, HEIGHT = 20;

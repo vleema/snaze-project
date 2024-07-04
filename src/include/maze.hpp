@@ -39,10 +39,26 @@ struct Position {
     }
     /// Overload to go in certain direction
     Position operator+(const Direction &dir) const {
-        const std::array<Position, 4> directions = {Position(0, 1), Position(0, -1),
-                                                    Position(-1, 0),
-                                                    Position(1, 0)}; //!< Up, Down, Left, Right
-        return *this + directions[(size_t)dir];
+        Position offset;
+        switch (dir) {
+        case Direction::Up:
+            offset = Position(0, 1);
+            break;
+        case Direction::Down:
+            offset = Position(0, -1);
+            break;
+        case Direction::Left:
+            offset = Position(-1, 0);
+            break;
+        case Direction::Right:
+            offset = Position(1, 0);
+            break;
+        case Direction::None:
+        default:
+            offset = Position(0, 0);
+            break;
+        }
+        return *this + offset;
     }
     /// 'less than' overload
     bool operator<(const Position &other) const {

@@ -18,7 +18,11 @@ struct Snake {
     Direction head_direction{Direction::None};
     /// Method to verify if a position corresponds to the snake body
     [[nodiscard]] bool is_snake_body(const Position &position) const {
-        return std::find(body.cbegin(), body.cend(), position) == body.cend();
+        return std::find(body.cbegin() + 1, body.cend(), position) != body.cend();
+    }
+    void reset() {
+        body.clear();
+        head_direction = Direction::None;
     }
 };
 /// Class responsible for finding the shortest path to the finish

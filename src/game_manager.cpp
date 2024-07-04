@@ -133,7 +133,7 @@ void SnazeManager::process() {
         m_snaze_mode = read_snaze_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.head_direction = read_starting_direction();
-        m_snake.body.push_back(m_maze.start());
+        m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
     } else if (m_snaze_state == SnazeState::On) {
         if (m_snaze_mode == SnazeMode::Player) {
             set_terminal_mode();
@@ -147,10 +147,13 @@ void SnazeManager::process() {
         //    if solution is not empty:
         //      input((char)solution.front());
         //      solution.pop_front();
+    } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
+        m_snaze_state = (read_yes_no_confirmation()) ? SnazeState::SnazeMode : SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::Damage) {
+        /// HACK: Maybe go directly to GameStart, is quite annoying pressing enter
     } else {
         read_enter_to_proceed();
     }
-    // TODO: process: GameLoop (Damage, Game Over, Won)
 }
 
 void SnazeManager::change_state_by_selected_menu_option() {
@@ -208,11 +211,11 @@ void SnazeManager::update() {
         m_maze.random_food_position();
     } else if (m_snaze_state == SnazeState::On) {
         bool ate = false;
-        auto temp_position = update_snake_position();
-        if (m_maze.blocked(temp_position, Direction::None) or
-            m_snake.is_snake_body(temp_position)) {
+        auto updated_snake_head_position = update_snake_position();
+        if (m_maze.blocked(updated_snake_head_position, Direction::None) or
+            m_snake.is_snake_body(updated_snake_head_position)) {
             m_snaze_state = SnazeState::Damage;
-        } else if (ate = m_maze.found_food(temp_position)) {
+        } else if (ate = m_maze.found_food(updated_snake_head_position)) {
             if (++m_eaten_food_amount_snake == m_settings.food_amount) {
                 m_snaze_state = SnazeState::Won;
             }
@@ -225,10 +228,19 @@ void SnazeManager::update() {
         if (not ate) {
             m_snake.body.pop_back();
         }
+    } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
+        // do nothing
+    } else if (m_snaze_state == SnazeState::Damage) {
+        if (--m_remaining_snake_lives == m_settings.lives) {
+            m_snaze_state = SnazeState::Lost;
+            return;
+        }
+        m_snaze_state = SnazeState::GameStart;
+        m_snake.reset();
+        // HACK: Maybe reset food also cause still showing on screen
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
-    /// TODO: Update: GameLoop (Damage, Won, Game Over)
 }
 
 void SnazeManager::screen_title(std::string new_screen_title) {
@@ -335,13 +347,22 @@ void SnazeManager::render() {
     } else if (m_snaze_state == SnazeState::On) {
         main_content(game_loop_mc());
     } else if (m_snaze_state == SnazeState::Damage) {
-
+        main_content(game_loop_info() + '\n' + m_maze.str_spawn());
+        interaction_msg("You suffered damage!!! Press <Enter> to continue");
+    } else if (m_snaze_state == SnazeState::Won) {
+        screen_title("The Snake has found it's way!");
+        main_content("This snake badass as fuck fr\n\n");
+        interaction_msg("Do you want to continue with the snaze? [y/n]");
+    } else if (m_snaze_state == SnazeState::Lost) {
+        // FIX: Not getting in here by some reason
+        screen_title("The snake got wrecked");
+        main_content("Unfortunaley the snaked as passed 🙁");
+        interaction_msg("Do you want to continue with the snaze? [y/n]");
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
         interaction_msg("Press <Enter> to go back");
     }
-    // TODO: Render: GameLoop (Damage, Game Over, Won)
     if (not m_screen_title.empty()) {
         std::cout << screen_title();
         m_screen_title.clear();
