@@ -1,4 +1,9 @@
 #include "include/ini_file_parser.h"
+#include "../src/include/game_manager.hpp"
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <sys/types.h>
 
 namespace ini {
 
@@ -16,8 +21,30 @@ std::ifstream Parser::open_file(const std::string &file_path) {
     return file;
 }
 
-Parser::IniUMap Parser::file(const std::string &settings_path) {
-    Parser::IniUMap settings;
+snaze::Settings convert_map_to_settings(const Parser::IniUMap &map) {
+    snaze::Settings settings;
+
+    for (const auto &[sec, key_val] : map) {
+        for (const auto &[key, val] : key_val) {
+            if (key == "food_amount") {
+                settings.food_amount = std::stoi(val);
+            } else if (key == "snake_lives") {
+                settings.lives = std::stoi(val);
+            } else if (key == "game_fps") {
+                settings.fps = std::stoi(val);
+            } else if (key == "player_type") {
+                settings.player_type = val;
+            } else {
+                throw std::invalid_argument("Unpredicted value");
+            }
+        }
+    }
+
+    return settings;
+}
+
+snaze::Settings Parser::file(const std::string &settings_path) {
+    Parser::IniUMap map;
     auto file = open_file(settings_path);
     std::string line;
     std::string current_section;
@@ -37,9 +64,11 @@ Parser::IniUMap Parser::file(const std::string &settings_path) {
         if (equal_pos != std::string::npos) {
             auto var = trim(line.substr(0, equal_pos));
             auto value = trim(line.substr(equal_pos + 1));
-            settings[current_section][var] = value;
+            map[current_section][var] = value;
         }
     }
-    return settings;
+
+    return convert_map_to_settings(map);
 }
+
 } // namespace ini

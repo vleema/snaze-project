@@ -60,6 +60,9 @@ struct Position {
         }
         return *this + offset;
     }
+    Position operator+=(const Direction &dir) const {
+        return *this + dir;
+    }
     /// 'less than' overload
     bool operator<(const Position &other) const {
         return coord_x < other.coord_x or (coord_x == other.coord_x and coord_y < other.coord_y);
@@ -101,6 +104,9 @@ class Maze {
     /// Given a Position `pos` tells if `pos` is in bounds
     [[nodiscard]] bool in_bound(const Position &pos) const {
         return (pos.coord_y < m_height and pos.coord_x < m_width);
+    }
+    [[nodiscard]] bool is_wall(const Position& pos) const { 
+        return m_maze[pos.coord_y][pos.coord_x] == Cell::Wall;
     }
     [[nodiscard]] Position start() const { return m_spawn; }
     /// Given a Position `pos` tells if `pos` is the finish or not

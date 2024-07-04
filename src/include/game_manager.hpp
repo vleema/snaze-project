@@ -3,19 +3,23 @@
 
 #include "maze.hpp"
 #include "snake.hpp"
+#include <stack>
 #include <string>
 #include <vector>
 
 namespace snaze {
-/// Class keeps track of the Snaze as whole, and follows GameLoop design
-/// pattern: https://gameprogrammingpatterns.com/game-loop.html
-class SnazeManager {
-    /// Snaze runnings opts that are cone be read from a ini file
-    struct Settings {
+
+/// Snaze runnings opts that are cone be read from a ini file
+struct Settings {
         size_t fps;
         size_t lives;
         size_t food_amount;
-    };
+        std::string player_type;
+};
+
+/// Class keeps track of the Snaze as whole, and follows GameLoop design
+/// pattern: https://gameprogrammingpatterns.com/game-loop.html
+class SnazeManager {
     /// Enum that represents the possibles game states
     enum class SnazeState {
         Init,
@@ -49,6 +53,11 @@ class SnazeManager {
         //Backtracking??
         Undefined,
     };
+
+    // Header info
+    size_t m_lives_remaining;
+    size_t m_score;
+    size_t m_food_eaten;
 
     // Back-end related
     SnazeState m_snaze_state{SnazeState::Init}; //!< The current state of the SnazeManager
@@ -118,11 +127,12 @@ class SnazeManager {
     [[nodiscard]] static Direction read_starting_direction();
     /// Reads the game input
     [[nodiscard]] static Direction input(char keystroke, Direction previous_direction);
-
-    // Update related variables and methods
-    void change_state_by_selected_menu_option();
     /// Update snake position based on her head direction, returns the new position of the snake
     Position update_snake_position();
+    // Update related variables and methods
+    void change_state_by_selected_menu_option();
+    // Verify if all the levels were played
+    [[nodiscard]] bool still_levels_available();
 
   public:
     /// Constructor

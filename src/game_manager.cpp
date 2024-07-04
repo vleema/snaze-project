@@ -34,22 +34,28 @@ std::vector<std::string> get_files_from_directory(const std::string &dir_name) {
     }
     return file_list;
 }
+
 bool read_yes_no_confirmation(/* bool yes_preferred = true */) {
     // TODO: Add default option functionality
     // FIX: Handle when user has inputed something other the "y/Y".
-    std::string choice;
+    // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
+    // "no"
+    string choice;
     std::cin >> choice;
     std::transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
     return choice == "y";
 }
+
 void read_enter_to_proceed() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
+
 void cin_clear() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
 void clear_screen() {
 #ifdef _WIN32
     system("cls");
@@ -60,13 +66,15 @@ void clear_screen() {
 } // namespace
 
 namespace snaze {
+
+bool SnazeManager::still_levels_available() {
+    return m_game_levels_files.size() != 0;
+}
+
 SnazeManager::SnazeManager(const std::string &game_levels_directory,
                            const std::string &ini_config_file_path) {
     m_game_levels_files = get_files_from_directory(game_levels_directory);
-    auto config_raw = ini::Parser::file(ini_config_file_path);
-    m_settings.fps = std::stoi(config_raw.at("").at("game_fps"));
-    m_settings.lives = std::stoi(config_raw.at("").at("snake_lives"));
-    m_settings.food_amount = std::stoi(config_raw.at("").at("food_amount"));
+    m_settings = ini::Parser::file(ini_config_file_path);
 }
 
 SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
@@ -105,7 +113,6 @@ SnazeManager::BotMode SnazeManager::read_bot_option() {
         return BotMode::Undefined;
     }
     return (BotMode)choice;
-}
 
 Direction SnazeManager::read_starting_direction() {
     set_terminal_mode();
@@ -149,6 +156,10 @@ void SnazeManager::process() {
     } else if(m_snaze_state == SnazeState::BotMode) {
         m_bot_strategy = read_bot_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
+        m_lives_remaining = m_settings.lives;
+        m_score = 0;
+        m_food_eaten = 0;
+
         m_snake.head_direction = read_starting_direction();
         m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
     } else if (m_snaze_state == SnazeState::On) {
@@ -204,69 +215,7 @@ Position SnazeManager::update_snake_position() {
     return m_snake.body.front();
 }
 
-void SnazeManager::update() {
-    if (not m_system_msg.empty()) {
-        return;
-    }
-    if (m_snaze_state == SnazeState::Init) {
-        m_snaze_state = SnazeState::MainMenu;
-    } else if (m_snaze_state == SnazeState::MainMenu) {
-        change_state_by_selected_menu_option();
-        m_menu_option = MainMenuOption::Undefined;
-    } else if (m_snaze_state == SnazeState::Quit) {
-        m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
-    } else if (m_snaze_state == SnazeState::SnazeMode) {
-        if(m_snaze_mode == SnazeMode::Bot) {
-            m_snaze_state = SnazeState::BotMode;   // Redirect to the bot selection screen
-        } else {
-            m_snaze_state = SnazeState::GameStart; // Playing manual
-        }
 
-        // Picking a random level
-        size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size());
-        m_maze = Maze(m_game_levels_files[random_idx]);
-        m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
-        m_remaining_snake_lives = m_settings.lives;
-    } else if (m_snaze_state == SnazeState::BotMode) {
-        if(m_bot_strategy != BotMode::Undefined) { // Just let the user leave if a valid opt was picked
-            m_snaze_state = SnazeState::GameStart;
-        }
-    } else if (m_snaze_state == SnazeState::GameStart) {
-        m_snaze_state = SnazeState::On;
-        m_maze.random_food_position();
-    } else if (m_snaze_state == SnazeState::On) {
-        bool ate = false;
-        auto updated_snake_head_position = update_snake_position();
-        if (m_maze.blocked(updated_snake_head_position, Direction::None) or
-            m_snake.is_snake_body(updated_snake_head_position)) {
-            m_snaze_state = SnazeState::Damage;
-        } else if (ate = m_maze.found_food(updated_snake_head_position)) {
-            if (++m_eaten_food_amount_snake == m_settings.food_amount) {
-                m_snaze_state = SnazeState::Won;
-            }
-            m_maze.random_food_position();
-        }
-        // TODO: Update: Add support for Bot mode
-        // if game mode == SnazeMode::Bot
-        //    if solution is empty:
-        //        solution = solve(m_maze);
-        if (not ate) {
-            m_snake.body.pop_back();
-        }
-    } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
-        // do nothing
-    } else if (m_snaze_state == SnazeState::Damage) {
-        if (--m_remaining_snake_lives == m_settings.lives) {
-            m_snaze_state = SnazeState::Lost;
-            return;
-        }
-        m_snaze_state = SnazeState::GameStart;
-        m_snake.reset();
-        // HACK: Maybe reset food also cause still showing on screen
-    } else {
-        m_snaze_state = SnazeState::MainMenu;
-    }
-}
 
 void SnazeManager::screen_title(std::string new_screen_title) {
     m_screen_title = std::move(new_screen_title);
@@ -357,6 +306,73 @@ std::string SnazeManager::game_loop_mc() const {
     // TODO: Add multiples '-' before the maze
 
     return oss.str();
+}
+
+void SnazeManager::update() {
+    if (not m_system_msg.empty()) {
+        return;
+    }
+    if (m_snaze_state == SnazeState::Init) {
+        m_snaze_state = SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::MainMenu) {
+        change_state_by_selected_menu_option();
+        m_menu_option = MainMenuOption::Undefined;
+    } else if (m_snaze_state == SnazeState::Quit) {
+        m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
+    } else if (m_snaze_state == SnazeState::SnazeMode) {
+        if(m_snaze_mode == SnazeMode::Bot) {
+            m_snaze_state = SnazeState::BotMode;   // Redirect to the bot selection screen
+        } else {
+            m_snaze_state = SnazeState::GameStart; // Playing manual
+        }
+        // NOTE: Picking a random level
+        if(still_levels_available()) {
+            size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size());
+            m_maze = Maze(m_game_levels_files[random_idx]);
+            m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
+        } else if(m_lives_remaining > 0){
+            m_snaze_state = SnazeState::Won;
+        }
+    } else if (m_snaze_state == SnazeState::BotMode) {
+        if(m_bot_strategy != BotMode::Undefined) { // Just let the user leave if a valid opt was picked
+            m_snaze_state = SnazeState::GameStart;
+        }
+    } else if (m_snaze_state == SnazeState::GameStart) {
+        m_snaze_state = SnazeState::On;
+        m_maze.random_food_position();
+    } else if (m_snaze_state == SnazeState::On) {
+        bool ate = false;
+        auto updated_snake_head_position = update_snake_position();
+        if (m_maze.blocked(updated_snake_head_position, Direction::None) or
+            m_snake.is_snake_body(updated_snake_head_position)) {
+            m_snaze_state = SnazeState::Damage;
+        } else if (ate = m_maze.found_food(updated_snake_head_position)) {
+            if (++m_eaten_food_amount_snake == m_settings.food_amount) {
+                m_snaze_state = SnazeState::Won;
+            }
+            m_maze.random_food_position();
+        }
+        // TODO: Update: Add support for Bot mode
+        // if game mode == SnazeMode::Bot
+        //    if solution is empty:
+        //        solution = solve(m_maze);
+        if (not ate) {
+            m_snake.body.pop_back();
+        }
+    } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
+        // do nothing
+    } else if (m_snaze_state == SnazeState::Damage) {
+        if (--m_remaining_snake_lives == m_settings.lives) {
+            m_snaze_state = SnazeState::Lost;
+            return;
+        }
+        m_snaze_state = SnazeState::GameStart;
+        m_snake.reset();
+        // HACK: Maybe reset food also cause still showing on screen
+    } else {
+        m_snaze_state = SnazeState::MainMenu;
+    }
+    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
 }
 
 void SnazeManager::render() {
