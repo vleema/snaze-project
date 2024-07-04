@@ -156,6 +156,7 @@ void SnazeManager::process() {
         m_score = 0;
         m_eaten_food_amount_snake = 0;
 
+        // FIX: Treat differently when in bot mode
         m_snake.head_direction = read_starting_direction();
         m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
     } else if (m_snaze_state == SnazeState::On) {
@@ -175,6 +176,7 @@ void SnazeManager::process() {
         m_snaze_state = (read_yes_no_confirmation()) ? SnazeState::SnazeMode : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::Damage) {
         /// HACK: Maybe go directly to GameStart, is quite annoying pressing enter
+        // FIX: When in bot mode player should press enter to restart the snake
     } else {
         read_enter_to_proceed();
     }
@@ -370,7 +372,6 @@ void SnazeManager::update() {
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
-    /// TODO: Update: GameLoop (Damage, Won, Game Over)
 }
 
 void SnazeManager::render() {
@@ -404,7 +405,6 @@ void SnazeManager::render() {
         main_content("This snake badass as fuck fr\n\n");
         interaction_msg("Do you want to continue with the snaze? [y/n]");
     } else if (m_snaze_state == SnazeState::Lost) {
-        // FIX: Not getting in here by some reason
         screen_title("The snake got wrecked");
         main_content("Unfortunaley the snaked as passed 🙁\n");
         interaction_msg("Do you want to continue with the snaze? [y/n]");
