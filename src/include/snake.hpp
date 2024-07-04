@@ -74,9 +74,11 @@ class SnakeBot {
         to_visit.push(pos);
         visited.insert(pos);
     }
-    
+
     /// Method that given a position on a maze returns the available moves
     static std::vector<Direction> positions_available(Position current, const Maze &maze);
+    /// Method to play the snake randomly, when there's no solution
+    static MaybeDirectionList play_random(const Maze &maze);
 };
 } // namespace snaze
 #endif // !SNAKE_HPP

@@ -67,9 +67,7 @@ void clear_screen() {
 
 namespace snaze {
 
-bool SnazeManager::still_levels_available() {
-    return m_game_levels_files.size() != 0;
-}
+bool SnazeManager::still_levels_available() { return m_game_levels_files.size() != 0; }
 
 SnazeManager::SnazeManager(const std::string &game_levels_directory,
                            const std::string &ini_config_file_path) {
@@ -92,9 +90,7 @@ SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
 SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
     int choice = 0;
     std::cin >> choice;
-    if (std::cin.fail() or 
-    choice < (int)SnazeMode::Player or 
-    choice > (int)SnazeMode::Bot) {
+    if (std::cin.fail() or choice < (int)SnazeMode::Player or choice > (int)SnazeMode::Bot) {
         cin_clear();
         system_msg("Invalid option, try again");
         return SnazeMode::Undefined;
@@ -105,14 +101,13 @@ SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
 SnazeManager::BotMode SnazeManager::read_bot_option() {
     int choice = 0;
     std::cin >> choice;
-    if (std::cin.fail() or 
-    choice < (int)BotMode::Smart or 
-    choice > (int)BotMode::Dumb) {
+    if (std::cin.fail() or choice < (int)BotMode::Smart or choice > (int)BotMode::Dumb) {
         cin_clear();
         system_msg("Invalid option, try again");
         return BotMode::Undefined;
     }
     return (BotMode)choice;
+}
 
 Direction SnazeManager::read_starting_direction() {
     set_terminal_mode();
@@ -153,12 +148,13 @@ void SnazeManager::process() {
         m_asked_to_quit = read_yes_no_confirmation();
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_mode = read_snaze_option();
-    } else if(m_snaze_state == SnazeState::BotMode) {
+    } else if (m_snaze_state == SnazeState::BotMode) {
         m_bot_strategy = read_bot_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
-        m_lives_remaining = m_settings.lives;
+        m_snake.reset();
+        m_remaining_snake_lives = m_settings.lives;
         m_score = 0;
-        m_food_eaten = 0;
+        m_eaten_food_amount_snake = 0;
 
         m_snake.head_direction = read_starting_direction();
         m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
@@ -214,8 +210,6 @@ Position SnazeManager::update_snake_position() {
     }
     return m_snake.body.front();
 }
-
-
 
 void SnazeManager::screen_title(std::string new_screen_title) {
     m_screen_title = std::move(new_screen_title);
@@ -320,37 +314,41 @@ void SnazeManager::update() {
     } else if (m_snaze_state == SnazeState::Quit) {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
-        if(m_snaze_mode == SnazeMode::Bot) {
-            m_snaze_state = SnazeState::BotMode;   // Redirect to the bot selection screen
+        if (m_snaze_mode == SnazeMode::Bot) {
+            m_snaze_state = SnazeState::BotMode; // Redirect to the bot selection screen
         } else {
             m_snaze_state = SnazeState::GameStart; // Playing manual
         }
         // NOTE: Picking a random level
-        if(still_levels_available()) {
-            size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size());
+        if (still_levels_available()) {
+            size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size() - 1);
             m_maze = Maze(m_game_levels_files[random_idx]);
             m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
-        } else if(m_lives_remaining > 0){
+        } else if (m_remaining_snake_lives > 0) {
             m_snaze_state = SnazeState::Won;
         }
     } else if (m_snaze_state == SnazeState::BotMode) {
-        if(m_bot_strategy != BotMode::Undefined) { // Just let the user leave if a valid opt was picked
+        if (m_bot_strategy !=
+            BotMode::Undefined) { // Just let the user leave if a valid opt was picked
             m_snaze_state = SnazeState::GameStart;
         }
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snaze_state = SnazeState::On;
         m_maze.random_food_position();
+        m_remaining_snake_lives =
+            (m_remaining_snake_lives == 0) ? m_settings.lives : m_remaining_snake_lives;
     } else if (m_snaze_state == SnazeState::On) {
         bool ate = false;
         auto updated_snake_head_position = update_snake_position();
         if (m_maze.blocked(updated_snake_head_position, Direction::None) or
             m_snake.is_snake_body(updated_snake_head_position)) {
             m_snaze_state = SnazeState::Damage;
-        } else if (ate = m_maze.found_food(updated_snake_head_position)) {
+        } else if (m_maze.found_food(updated_snake_head_position)) {
             if (++m_eaten_food_amount_snake == m_settings.food_amount) {
                 m_snaze_state = SnazeState::Won;
             }
             m_maze.random_food_position();
+            ate = true;
         }
         // TODO: Update: Add support for Bot mode
         // if game mode == SnazeMode::Bot
@@ -360,9 +358,9 @@ void SnazeManager::update() {
             m_snake.body.pop_back();
         }
     } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
-        // do nothing
+
     } else if (m_snaze_state == SnazeState::Damage) {
-        if (--m_remaining_snake_lives == m_settings.lives) {
+        if (--m_remaining_snake_lives != 0U) {
             m_snaze_state = SnazeState::Lost;
             return;
         }
@@ -372,7 +370,7 @@ void SnazeManager::update() {
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
-    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
+    /// TODO: Update: GameLoop (Damage, Won, Game Over)
 }
 
 void SnazeManager::render() {
@@ -408,7 +406,7 @@ void SnazeManager::render() {
     } else if (m_snaze_state == SnazeState::Lost) {
         // FIX: Not getting in here by some reason
         screen_title("The snake got wrecked");
-        main_content("Unfortunaley the snaked as passed 🙁");
+        main_content("Unfortunaley the snaked as passed 🙁\n");
         interaction_msg("Do you want to continue with the snaze? [y/n]");
     } else {
         screen_title("WORK IN PROGRESS 🛠️");

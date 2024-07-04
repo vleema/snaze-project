@@ -11,10 +11,10 @@ namespace snaze {
 
 /// Snaze runnings opts that are cone be read from a ini file
 struct Settings {
-        size_t fps;
-        size_t lives;
-        size_t food_amount;
-        std::string player_type;
+    size_t fps;
+    size_t lives;
+    size_t food_amount;
+    std::string player_type;
 };
 
 /// Class keeps track of the Snaze as whole, and follows GameLoop design
@@ -50,20 +50,18 @@ class SnazeManager {
     enum class BotMode {
         Smart = 1,
         Dumb,
-        //Backtracking??
+        // Backtracking??
         Undefined,
     };
 
     // Header info
-    size_t m_lives_remaining;
     size_t m_score;
-    size_t m_food_eaten;
 
     // Back-end related
     SnazeState m_snaze_state{SnazeState::Init}; //!< The current state of the SnazeManager
     Settings m_settings{};                      //!< Snaze running opts
-    size_t m_remaining_snake_lives{};           //!< Current game session amount of remaining lives
-    size_t m_eaten_food_amount_snake{};         //!< How much food the snake have already eaten
+    size_t m_remaining_snake_lives{0};          //!< Current game session amount of remaining lives
+    size_t m_eaten_food_amount_snake{0};        //!< How much food the snake have already eaten
     bool m_game_over{false};                    //!< Boolean to tell if the game as ended or not
     SnakeBot m_snake_bot;                       //!< A bot that autoplays the game
     Snake m_snake;                              //!< The actual snake that are being moved
@@ -131,8 +129,12 @@ class SnazeManager {
     Position update_snake_position();
     // Update related variables and methods
     void change_state_by_selected_menu_option();
-    // Verify if all the levels were played
+    /// Verify if all the levels were played
     [[nodiscard]] bool still_levels_available();
+    /// Resets the snake and her dependencies
+    void reset_snake();
+    /// Initializes the snake and her dependencies
+    void initialize_snake();
 
   public:
     /// Constructor

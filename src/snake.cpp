@@ -29,33 +29,33 @@ SnakeBot::MaybeDirectionList SnakeBot::solve(const Maze &maze) {
     return std::nullopt;
 }
 
-std::vector<Direction> SnakeBot::positions_available(Position current, Maze &maze){
+std::vector<Direction> SnakeBot::positions_available(Position current, const Maze &maze) {
     std::vector<Direction> moves;
-    for(const auto& dir : {Direction::Up, Direction::Down, Direction::Right, Direction::Left}) {
-        if(!maze.blocked(current,dir)) {
+    for (const auto &dir : {Direction::Up, Direction::Down, Direction::Right, Direction::Left}) {
+        if (!maze.blocked(current, dir)) {
             moves.push_back(dir);
         }
     }
     return moves;
 }
 
-// TODO?: Account for snake body
 SnakeBot::MaybeDirectionList SnakeBot::play_random(const Maze &maze) {
     MaybeDirectionList moves;
     auto current_pos = maze.start();
     auto first_move = positions_available(current_pos, maze);
-    auto head_dir = first_move[std::experimental::randint(0,(int)first_move.size()-1)];
-    
-    while(!maze.found_finish(current_pos) or maze.is_wall(current_pos)) {
+    auto head_dir = first_move[std::experimental::randint(0, (int)first_move.size() - 1)];
+
+    while (!maze.found_food(current_pos) or maze.is_wall(current_pos)) {
         std::vector<Direction> possible_moves = positions_available(current_pos, maze);
-        
-        if(possible_moves.size() == 0) { //The snake entered a dead end
+
+        if (possible_moves.size() == 0) { // The snake entered a dead end
             current_pos += Direction::Right;
             moves->push_back(Direction::Right);
             head_dir = Direction::Right;
         } else {
-            for(const auto& move : possible_moves) {
-                if(maze.found_finish(current_pos + move) and opposite(head_dir) != move) { //Snake is next to the food
+            for (const auto &move : possible_moves) {
+                if (maze.found_food(current_pos + move) and
+                    opposite(head_dir) != move) { // Snake is next to the food
                     moves->push_back(move);
                     current_pos += move;
                     head_dir = move;
@@ -68,9 +68,9 @@ SnakeBot::MaybeDirectionList SnakeBot::play_random(const Maze &maze) {
             Direction pick;
 
             do {
-                pick_index = std::experimental::randint(0,(int)possible_moves.size()-1);
+                pick_index = std::experimental::randint(0, (int)possible_moves.size() - 1);
                 pick = possible_moves[pick_index];
-            } while(opposite(pick) == head_dir); //To make sure to dont go backwards
+            } while (opposite(pick) == head_dir); // To make sure to dont go backwards
 
             moves->push_back(pick);
             current_pos += pick;

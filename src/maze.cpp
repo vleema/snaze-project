@@ -110,7 +110,7 @@ std::string Maze::str_in_game(const std::deque<Position> &snake_body,
     maze_copy[snake_body.front().coord_y][snake_body.front().coord_x] = Cell::SnakeHead;
     for (const auto &row : maze_copy) {
         for (const auto &cell : row) {
-            if (cell == Cell::Free or cell == Cell::InvisibleWall) {
+            if (cell == Cell::Free or cell == Cell::InvisibleWall or cell == Cell::Spawn) {
                 oss << free;
             } else if (cell == Cell::Wall) {
                 oss << Color::tcolor(wall_or_body, Color::GREEN);
