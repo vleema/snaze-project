@@ -16,13 +16,22 @@ namespace snaze {
 struct Snake {
     std::deque<Position> body;
     Direction head_direction{Direction::None};
+    /// Copy constructor
+    Snake(const Snake &rhs) = default;
     /// Method to verify if a position corresponds to the snake body
     [[nodiscard]] bool is_snake_body(const Position &position) const {
         return std::find(body.cbegin() + 1, body.cend(), position) != body.cend();
     }
+    /// Resets the snake to it's defaults
     void reset() {
         body.clear();
         head_direction = Direction::None;
+    }
+    /// Moves the snake in some direction, and returns the head position
+    Position move_snake(const Direction &direction) {
+        body.push_front(body.front() + direction);
+        body.pop_back();
+        return body.front();
     }
 };
 /// Class responsible for finding the shortest path to the finish
@@ -32,7 +41,7 @@ class SnakeBot {
     using PositionUSet = std::unordered_set<Position, Position::Hash>;
 
     /// Method to solve the maze
-    static MaybeDirectionList solve(const Maze &maze);
+    static MaybeDirectionList solve(const Maze &maze, const Snake &snake);
 
     /// Method to print the solution from start to finish
     static std::string str(const Maze &maze, std::list<Direction> &solution);
@@ -69,8 +78,8 @@ class SnakeBot {
         return visited.find(pos) != visited.cend();
     }
     /// Method to visit a position and save that o Solver variables
-    static void visit_position(const Position &pos, std::queue<Position> &to_visit,
-                               PositionUSet &visited) {
+    static void to_visit_position_append(const Position &pos, std::queue<Position> &to_visit,
+                                         PositionUSet &visited) {
         to_visit.push(pos);
         visited.insert(pos);
     }
