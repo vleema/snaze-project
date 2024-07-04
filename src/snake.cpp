@@ -14,7 +14,7 @@ SnakeBot::MaybeDirectionList SnakeBot::solve(const Maze &maze) {
     while (not to_visit.empty()) {
         auto current_pos = to_visit.front();
         to_visit.pop();
-        if (maze.found_finish(current_pos))
+        if (maze.found_food(current_pos))
             return reconstruct_path(came_from, start_pos, current_pos);
         for (const auto &dir : directions) {
             auto next_pos = current_pos + dir;

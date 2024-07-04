@@ -88,7 +88,7 @@ class Maze {
     }
     [[nodiscard]] Position start() const { return m_spawn; }
     /// Given a Position `pos` tells if `pos` is the finish or not
-    [[nodiscard]] bool found_finish(const Position &pos) const { return pos == m_food; }
+    [[nodiscard]] bool found_food(const Position &pos) const { return pos == m_food; }
     /// Given a Position `pos` and a direction `dir` see tells if the subsequent
     /// position is acessible or not.
     [[nodiscard]] bool blocked(const Position &pos, const Direction &dir) const {

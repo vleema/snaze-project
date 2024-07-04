@@ -3,7 +3,6 @@
 #include <deque>
 #include <fstream>
 #include <istream>
-#include <list>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -99,7 +98,6 @@ std::string Maze::str_in_game(const std::deque<Position> &snake_body,
                               const Direction &snake_head_direction) const {
     constexpr char wall_or_body[] = "█";
     constexpr char free = ' ';
-    constexpr char spawn[] = "꩜";
     constexpr char food[] = "🥚";
     constexpr char head_v[] = "ⸯ";
     constexpr char head_h[] = "~";

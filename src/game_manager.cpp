@@ -3,6 +3,7 @@
 #include "ini_file_parser.h"
 #include "maze.hpp"
 #include "terminal_utils.h"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
@@ -99,6 +100,27 @@ Direction SnazeManager::read_starting_direction() {
     return (Direction)start_direction;
 }
 
+Direction SnazeManager::input(char keystroke, Direction previous_direction) {
+    Direction input_result = Direction::None;
+    switch (keystroke) {
+    case 'w':
+        input_result = (previous_direction != Direction::Down) ? Direction::Up : previous_direction;
+        break;
+    case 's':
+        input_result = (previous_direction != Direction::Up) ? Direction::Down : previous_direction;
+        break;
+    case 'a':
+        input_result =
+            (previous_direction != Direction::Right) ? Direction::Left : previous_direction;
+        break;
+    case 'd':
+        input_result =
+            (previous_direction != Direction::Left) ? Direction::Right : previous_direction;
+        break;
+    }
+    return input_result;
+}
+
 void SnazeManager::process() {
     if (m_snaze_state == SnazeState::Init) {
     } else if (m_snaze_state == SnazeState::MainMenu) {
@@ -110,10 +132,14 @@ void SnazeManager::process() {
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.head_direction = read_starting_direction();
     } else if (m_snaze_state == SnazeState::On) {
-        // if game mode == Normal:
-        //    set_terminal_mode();
-        //    input(input(), getch());
-        //    reset_terminal_mode();
+        if (m_snaze_mode == SnazeMode::Player) {
+            set_terminal_mode();
+            if (kbhit() != 0) {
+                m_snake.head_direction = input(static_cast<char>(getch()), m_snake.head_direction);
+            }
+            reset_terminal_mode();
+        }
+        // TODO: Add support for Bot mode
         // else if game mode == Bot:
         //    While solution is not empty:
         //      input(solution.pop);
@@ -121,7 +147,7 @@ void SnazeManager::process() {
     } else {
         read_enter_to_proceed();
     }
-    // TODO: process: GameLoop (On, Damage, Game Over, Won)
+    // TODO: process: GameLoop (Damage, Game Over, Won)
 }
 
 void SnazeManager::change_state_by_selected_menu_option() {
@@ -129,6 +155,30 @@ void SnazeManager::change_state_by_selected_menu_option() {
         {MainMenuOption::Play, SnazeState::SnazeMode}, {MainMenuOption::Quit, SnazeState::Quit}};
     auto temp_game_state = states.find(m_menu_option);
     m_snaze_state = (temp_game_state != states.cend()) ? temp_game_state->second : m_snaze_state;
+}
+
+Position SnazeManager::update_snake_position() {
+    switch (m_snake.head_direction) {
+    case Direction::Up:
+        m_snake.body.emplace_front(m_snake.body[0].coord_x,
+                                   (m_snake.body[0].coord_y - 1 % m_maze.height()) %
+                                       m_maze.height());
+        break;
+    case Direction::Down:
+        m_snake.body.emplace_front(m_snake.body[0].coord_x,
+                                   (m_snake.body[0].coord_y + 1 % m_maze.height()) %
+                                       m_maze.height());
+        break;
+    case Direction::Left:
+        m_snake.body.emplace_front((m_snake.body[0].coord_x - 1 % m_maze.width()) % m_maze.width(),
+                                   m_snake.body[0].coord_y);
+        break;
+    case Direction::Right:
+        m_snake.body.emplace_front((m_snake.body[0].coord_x + 1 % m_maze.width()) % m_maze.width(),
+                                   m_snake.body[0].coord_y);
+        break;
+    }
+    return m_snake.body.front();
 }
 
 void SnazeManager::update() {
@@ -149,20 +199,23 @@ void SnazeManager::update() {
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
     } else if (m_snaze_state == SnazeState::On) {
-        // auto temp_position = update_snake_position()
-        // if temp_position get damage:
-        //    m_snaze_state = SnazeState::Damage;
-        // else if temp_position get food:
-        //    score++;
-        //    if ++eaten == m_settings.food_amount:
-        //       m_snaze_state = SnazeState::Won;
+        auto temp_position = update_snake_position();
+        if (m_maze.blocked(temp_position, Direction::None) or
+            m_snake.is_snake_body(temp_position)) {
+            m_snaze_state = SnazeState::Damage;
+        } else if (m_maze.found_food(temp_position)) {
+            if (++m_eaten_food_amount_snake == m_settings.food_amount) {
+                m_snaze_state = SnazeState::Won;
+            }
+        }
+        // TODO: Update: Add support for Bot mode
         // if game mode == SnazeMode::Bot
         //    if solution is empty:
         //        solution = solve(m_maze);
     } else {
         m_snaze_state = SnazeState::MainMenu;
     }
-    /// TODO: Update: GameLoop (On, Damage, Won, Game Over)
+    /// TODO: Update: GameLoop (Damage, Won, Game Over)
 }
 
 void SnazeManager::screen_title(std::string new_screen_title) {
@@ -240,7 +293,14 @@ std::string SnazeManager::game_loop_info() const {
     return header_str;
 }
 
-std::string SnazeManager::game_loop_mc() const { return "hi"; }
+std::string SnazeManager::game_loop_mc() const {
+    std::ostringstream oss;
+    oss << game_loop_info() << '\n';
+    oss << m_maze.str_in_game(m_snake.body, m_snake.head_direction);
+    // TODO: Add multiples '-' before the maze
+
+    return oss.str();
+}
 
 void SnazeManager::render() {
     clear_screen();
@@ -260,13 +320,15 @@ void SnazeManager::render() {
         main_content(m_maze.str_spawn());
         interaction_msg(R"(Controls: "w" - UP "s" - DOWN "d" - RIGHT "a" - LEFT)");
     } else if (m_snaze_state == SnazeState::On) {
-        /// TODO: Render Maze with snake, points, lives remaining and foods eaten
+        main_content(game_loop_mc());
+    } else if (m_snaze_state == SnazeState::Damage) {
+
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");
         interaction_msg("Press <Enter> to go back");
     }
-    // TODO: Render: GameLoop (On, Damage, Game Over, Won)
+    // TODO: Render: GameLoop (Damage, Game Over, Won)
     if (not m_screen_title.empty()) {
         std::cout << screen_title();
         m_screen_title.clear();

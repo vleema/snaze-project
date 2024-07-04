@@ -1,6 +1,7 @@
 #ifndef SNAKE_HPP
 #define SNAKE_HPP
 
+#include <algorithm>
 #include <deque>
 #include <list>
 #include <map>
@@ -15,6 +16,10 @@ namespace snaze {
 struct Snake {
     std::deque<Position> body;
     Direction head_direction{Direction::None};
+    /// Method to verify if a position corresponds to the snake body
+    [[nodiscard]] bool is_snake_body(const Position &position) const {
+        return std::find(body.cbegin(), body.cend(), position) == body.cend();
+    }
 };
 /// Class responsible for finding the shortest path to the finish
 class SnakeBot {

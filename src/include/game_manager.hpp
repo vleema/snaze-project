@@ -103,9 +103,13 @@ class SnazeManager {
     SnazeMode read_snaze_option();
     /// Reads starting direction, when the game starts
     [[nodiscard]] static Direction read_starting_direction();
+    /// Reads the game input
+    [[nodiscard]] static Direction input(char keystroke, Direction previous_direction);
 
     // Update related variables and methods
     void change_state_by_selected_menu_option();
+    /// Update snake position based on her head direction, returns the new position of the snake
+    Position update_snake_position();
 
   public:
     /// Constructor
