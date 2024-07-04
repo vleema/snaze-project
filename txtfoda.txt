@@ -1,7 +1,7 @@
 TA FALTANDO ISO AQ:
     * Fazer o game manager utils (done)
     * Pop-up depois de ter tomado dano
-    * Levar em consideração o corpo da cobra na bfs
+    * Levar em consideração o corpo da cobra na bfs (done)
     * Process especial do damage quando no modo bot
     * Suporte para o Bot no Jogo
     * Opção padrão padrão para o yes or no

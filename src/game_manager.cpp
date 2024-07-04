@@ -18,7 +18,7 @@ void SnazeManager::process() {
     } else if (m_snaze_state == SnazeState::MainMenu) {
         m_menu_option = read_menu_option();
     } else if (m_snaze_state == SnazeState::Quit) {
-        m_asked_to_quit = read_yes_no_confirmation();
+        m_asked_to_quit = read_yes_no_confirmation(false);
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_mode = read_snaze_option();
     } else if (m_snaze_state == SnazeState::BotMode) {
@@ -46,7 +46,8 @@ void SnazeManager::process() {
         //      input((char)solution.front());
         //      solution.pop_front();
     } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
-        m_snaze_state = (read_yes_no_confirmation()) ? SnazeState::SnazeMode : SnazeState::MainMenu;
+        m_snaze_state =
+            (read_yes_no_confirmation(true)) ? SnazeState::SnazeMode : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::Damage) {
         /// HACK: Maybe go directly to GameStart, is quite annoying pressing enter
         // FIX: When in bot mode player should press enter to restart the snake
@@ -134,7 +135,7 @@ void SnazeManager::render() {
     } else if (m_snaze_state == SnazeState::Quit) {
         screen_title("Quitting");
         main_content("Do you want to quit the snaze game? ");
-        interaction_msg("[Y/n]");
+        interaction_msg("[y/N]");
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         screen_title("Snaze Mode");
         main_content(snaze_mode_mc());
@@ -154,11 +155,11 @@ void SnazeManager::render() {
     } else if (m_snaze_state == SnazeState::Won) {
         screen_title("The Snake has found it's way!");
         main_content("This snake badass as fuck fr\n\n");
-        interaction_msg("Do you want to continue with the snaze? [y/n]");
+        interaction_msg("Do you want to continue with the snaze? [Y/n]");
     } else if (m_snaze_state == SnazeState::Lost) {
         screen_title("The snake got wrecked");
         main_content("Unfortunaley the snaked as passed 🙁\n");
-        interaction_msg("Do you want to continue with the snaze? [y/n]");
+        interaction_msg("Do you want to continue with the snaze? [Y/n]");
     } else {
         screen_title("WORK IN PROGRESS 🛠️");
         main_content("Sorry that function isn't implemented yet 😓\n\n");

@@ -16,7 +16,7 @@ void clear_screen() {
 #endif
 }
 
-bool read_yes_no_confirmation(/* bool yes_preferred = true */) {
+bool read_yes_no_confirmation(bool yes_preffered = true) {
     // TODO: Add default option functionality
     // FIX: Handle when user has inputed something other the "y/Y".
     // FIX: Make a default option, and handle cases where the user inputed anything but "yes" or
