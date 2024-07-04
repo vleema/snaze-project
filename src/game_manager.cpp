@@ -84,12 +84,27 @@ SnazeManager::MainMenuOption SnazeManager::read_menu_option() {
 SnazeManager::SnazeMode SnazeManager::read_snaze_option() {
     int choice = 0;
     std::cin >> choice;
-    if (std::cin.fail() or choice < (int)SnazeMode::Player or choice > (int)SnazeMode::Bot) {
+    if (std::cin.fail() or 
+    choice < (int)SnazeMode::Player or 
+    choice > (int)SnazeMode::Bot) {
         cin_clear();
         system_msg("Invalid option, try again");
         return SnazeMode::Undefined;
     }
     return (SnazeMode)choice;
+}
+
+SnazeManager::BotMode SnazeManager::read_bot_option() {
+    int choice = 0;
+    std::cin >> choice;
+    if (std::cin.fail() or 
+    choice < (int)BotMode::Smart or 
+    choice > (int)BotMode::Dumb) {
+        cin_clear();
+        system_msg("Invalid option, try again");
+        return BotMode::Undefined;
+    }
+    return (BotMode)choice;
 }
 
 Direction SnazeManager::read_starting_direction() {
@@ -131,6 +146,8 @@ void SnazeManager::process() {
         m_asked_to_quit = read_yes_no_confirmation();
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         m_snaze_mode = read_snaze_option();
+    } else if(m_snaze_state == SnazeState::BotMode) {
+        m_bot_strategy = read_bot_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.head_direction = read_starting_direction();
         m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
@@ -199,13 +216,21 @@ void SnazeManager::update() {
     } else if (m_snaze_state == SnazeState::Quit) {
         m_snaze_state = (m_asked_to_quit) ? m_snaze_state : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::SnazeMode) {
-        m_snaze_state = SnazeState::GameStart;
-        // Picking a random level
+        if(m_snaze_mode == SnazeMode::Bot) {
+            m_snaze_state = SnazeState::BotMode;   // Redirect to the bot selection screen
+        } else {
+            m_snaze_state = SnazeState::GameStart; // Playing manual
+        }
 
+        // Picking a random level
         size_t random_idx = std::experimental::randint(0, (int)m_game_levels_files.size());
         m_maze = Maze(m_game_levels_files[random_idx]);
         m_game_levels_files.erase(m_game_levels_files.cbegin() + (long)random_idx);
         m_remaining_snake_lives = m_settings.lives;
+    } else if (m_snaze_state == SnazeState::BotMode) {
+        if(m_bot_strategy != BotMode::Undefined) { // Just let the user leave if a valid opt was picked
+            m_snaze_state = SnazeState::GameStart;
+        }
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snaze_state = SnazeState::On;
         m_maze.random_food_position();
@@ -298,6 +323,13 @@ std::string SnazeManager::snaze_mode_mc() {
     return oss.str();
 }
 
+std::string SnazeManager::bot_mode_mc() {
+    std::ostringstream oss;
+    oss << "[1] - Smart bot\n"
+        << "[2] - Dumb bot\n";
+    return oss.str();
+}
+
 std::string SnazeManager::game_loop_info() const {
     // ♥︎ ☠
     constexpr char heart[] = "♥︎";
@@ -340,6 +372,10 @@ void SnazeManager::render() {
     } else if (m_snaze_state == SnazeState::SnazeMode) {
         screen_title("Snaze Mode");
         main_content(snaze_mode_mc());
+        interaction_msg("Select one option and press enter");
+    } else if (m_snaze_state == SnazeState::BotMode) {
+        screen_title("Select bot type:");
+        main_content(bot_mode_mc());
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
         main_content(m_maze.str_spawn());

@@ -21,6 +21,7 @@ class SnazeManager {
         Init,
         MainMenu,
         SnazeMode,
+        BotMode,
         GameStart,
         On,
         Damage,
@@ -39,6 +40,13 @@ class SnazeManager {
     enum class SnazeMode {
         Player = 1,
         Bot,
+        Undefined,
+    };
+    /// Enum that represents algorithm that will be used to solve the maze
+    enum class BotMode {
+        Smart = 1,
+        Dumb,
+        //Backtracking??
         Undefined,
     };
 
@@ -87,6 +95,8 @@ class SnazeManager {
     [[nodiscard]] static std::string quit_mc();
     /// SnazeMode screen
     [[nodiscard]] static std::string snaze_mode_mc();
+    /// BotMode screen
+    [[nodiscard]] static std::string bot_mode_mc();
     /// It renders the remaining lives and pontuation of the player
     [[nodiscard]] std::string game_loop_info() const;
     /// It renders the snake with the maze
@@ -94,6 +104,7 @@ class SnazeManager {
 
     // Process related variables and methods
     SnazeMode m_snaze_mode{SnazeMode::Undefined}; //!< How the snaze will be played
+    BotMode m_bot_strategy{BotMode::Undefined};
     MainMenuOption m_menu_option{
         MainMenuOption::Undefined}; //!< The selected menu option in Main menu state
     bool m_asked_to_quit{false};
@@ -101,6 +112,8 @@ class SnazeManager {
     MainMenuOption read_menu_option();
     /// Reads the user SnazeModeselected option
     SnazeMode read_snaze_option();
+    /// Reads the user preference about the bot
+    BotMode read_bot_option();
     /// Reads starting direction, when the game starts
     [[nodiscard]] static Direction read_starting_direction();
     /// Reads the game input
