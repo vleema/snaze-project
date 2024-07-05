@@ -41,10 +41,10 @@ struct Position {
     Position operator+(const Direction &dir) const {
         Position offset;
         switch (dir) {
-        case Direction::Up:
+        case Direction::Down:
             offset = Position(0, 1);
             break;
-        case Direction::Down:
+        case Direction::Up:
             offset = Position(0, -1);
             break;
         case Direction::Left:

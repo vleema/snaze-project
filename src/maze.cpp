@@ -108,7 +108,7 @@ std::string Maze::str_debug(const std::deque<Direction> &solution) const {
     for (const auto &dir : solution) {
         current_pos = current_pos + dir;
         maze_copy[current_pos.coord_y][current_pos.coord_x] =
-            (current_pos != m_food) ? Cell::SnakeBody : Cell::SnakeBody;
+            (current_pos != m_food) ? Cell::SnakeBody : Cell::Food;
     }
     for (const auto &row : maze_copy) {
         for (const auto &cell : row) {

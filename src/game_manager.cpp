@@ -27,14 +27,13 @@ void SnazeManager::process() {
         m_bot_strategy = read_bot_option();
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snake.reset();
-        m_remaining_snake_lives = m_settings.lives;
-        m_score = 0;
-        m_eaten_food_amount_snake = 0;
         m_maze.random_food_position();
 
         if (m_snaze_mode == SnazeMode::Bot) {
             m_snake.body.push_front(m_maze.start());
             snake_bot_think(m_snake);
+            // std::cerr << '\n' << m_maze.str_debug(m_snake_bot.solution.value());
+            // exit(0);
             return;
         }
         m_snake.head_direction = read_starting_direction();
@@ -47,11 +46,9 @@ void SnazeManager::process() {
             }
             reset_terminal_mode();
         } else if (m_snaze_mode == SnazeMode::Bot) {
-            if (m_snake_bot.solution.value().empty()) {
+            if (m_snake_bot.solution.has_value() and m_snake_bot.solution.value().empty()) {
                 snake_bot_think(m_snake);
             }
-            std::cerr << '\n' << m_maze.str_debug(m_snake_bot.solution.value());
-            exit(0);
             m_snake.head_direction = m_snake_bot.solution.value().front();
             m_snake_bot.solution.value().pop_front();
         }
@@ -94,6 +91,9 @@ void SnazeManager::update() {
         } else if (m_remaining_snake_lives > 0) {
             m_snaze_state = SnazeState::Won;
         }
+        m_score = 0;
+        m_eaten_food_amount_snake = 0;
+        m_remaining_snake_lives = m_settings.lives;
     } else if (m_snaze_state == SnazeState::BotMode) {
         if (m_bot_strategy !=
             BotMode::Undefined) { // Just let the user leave if a valid opt was picked
@@ -101,8 +101,6 @@ void SnazeManager::update() {
         }
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snaze_state = SnazeState::On;
-        m_remaining_snake_lives =
-            (m_remaining_snake_lives == 0) ? m_settings.lives : m_remaining_snake_lives;
     } else if (m_snaze_state == SnazeState::On) {
         bool ate = false;
         auto updated_snake_head_position = update_snake_position();
@@ -120,9 +118,9 @@ void SnazeManager::update() {
             m_snake.body.pop_back();
         }
     } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
-
+        m_new_game = true;
     } else if (m_snaze_state == SnazeState::Damage) {
-        if (--m_remaining_snake_lives != 0U) {
+        if (--m_remaining_snake_lives == 0) {
             m_snaze_state = SnazeState::Lost;
             return;
         }

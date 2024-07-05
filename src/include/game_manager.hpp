@@ -63,9 +63,10 @@ class SnazeManager {
     size_t m_remaining_snake_lives{0};          //!< Current game session amount of remaining lives
     size_t m_eaten_food_amount_snake{0};        //!< How much food the snake have already eaten
     bool m_game_over{false};                    //!< Boolean to tell if the game as ended or not
-    SnakeBot m_snake_bot;                       //!< A bot that autoplays the game
-    Snake m_snake;                              //!< The actual snake that are being moved
-    Maze m_maze;                                //!< Representation of the maze
+    bool m_new_game{true};
+    SnakeBot m_snake_bot;                         //!< A bot that autoplays the game
+    Snake m_snake;                                //!< The actual snake that are being moved
+    Maze m_maze;                                  //!< Representation of the maze
     std::vector<std::string> m_game_levels_files; //!<- A list containing all the game levels
 
     // Render related variables and methods

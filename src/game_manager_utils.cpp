@@ -87,7 +87,7 @@ Direction SnazeManager::input(char keystroke, Direction previous_direction) {
 void SnazeManager::snake_bot_think(const Snake &snake) {
     m_snake_bot.solution = SnakeBot::solve(m_maze, snake);
     if (not m_snake_bot.solution.has_value()) {
-        m_snake_bot.solution = SnakeBot::play_random(m_maze);
+        m_snake_bot.solution = SnakeBot::play_random(m_maze, snake);
         if (!m_snake_bot.solution.has_value()) {
             throw std::runtime_error("Something went wrong, while the bot was thinking");
         }

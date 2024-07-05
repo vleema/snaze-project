@@ -48,7 +48,7 @@ class SnakeBot {
     static MaybeDirectionDeque solve(const Maze &maze, const Snake &snake);
 
     /// Method to play the snake randomly, when there's no solution
-    static MaybeDirectionDeque play_random(const Maze &maze);
+    static MaybeDirectionDeque play_random(const Maze &maze, const Snake &snake);
 
   private:
     /// Method to get the opposite direction
@@ -89,7 +89,7 @@ class SnakeBot {
     }
 
     /// Method that given a position on a maze returns the available moves
-    static std::vector<Direction> positions_available(Position current, const Maze &maze);
+    static std::vector<Direction> positions_available(const Maze &maze, const Snake &snake);
 };
 } // namespace snaze
 #endif // !SNAKE_HPP
