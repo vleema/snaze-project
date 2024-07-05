@@ -3,7 +3,7 @@
 
 #include <experimental/random>
 namespace snaze {
-SnakeBot::MaybeDirectionList SnakeBot::solve(const Maze &maze, const Snake &snake) {
+SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &snake) {
     // TODO: Account for snake body
     std::queue<Position> to_visit;
     std::unordered_set<Position, Position::Hash> meta_visited;
@@ -45,8 +45,8 @@ std::vector<Direction> SnakeBot::positions_available(Position current, const Maz
     return moves;
 }
 
-SnakeBot::MaybeDirectionList SnakeBot::play_random(const Maze &maze) {
-    MaybeDirectionList moves;
+SnakeBot::MaybeDirectionDeque SnakeBot::play_random(const Maze &maze) {
+    MaybeDirectionDeque moves;
     auto current_pos = maze.start();
     auto first_move = positions_available(current_pos, maze);
     auto head_dir = first_move[std::experimental::randint(0, (int)first_move.size() - 1)];

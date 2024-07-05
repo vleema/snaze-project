@@ -1,5 +1,6 @@
 #include "game_manager.hpp"
 #include "maze.hpp"
+#include "snake.hpp"
 #include "terminal_utils.h"
 #include "utils.hpp"
 
@@ -7,6 +8,7 @@
 #include <cstdlib>
 #include <experimental/random>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -28,8 +30,13 @@ void SnazeManager::process() {
         m_remaining_snake_lives = m_settings.lives;
         m_score = 0;
         m_eaten_food_amount_snake = 0;
+        m_maze.random_food_position();
 
-        // FIX: Treat differently when in bot mode
+        if (m_snaze_mode == SnazeMode::Bot) {
+            m_snake.body.push_front(m_maze.start());
+            snake_bot_think(m_snake);
+            return;
+        }
         m_snake.head_direction = read_starting_direction();
         m_snake.body.push_back(m_maze.start() + m_snake.head_direction);
     } else if (m_snaze_state == SnazeState::On) {
@@ -39,18 +46,24 @@ void SnazeManager::process() {
                 m_snake.head_direction = input(static_cast<char>(getch()), m_snake.head_direction);
             }
             reset_terminal_mode();
+        } else if (m_snaze_mode == SnazeMode::Bot) {
+            if (m_snake_bot.solution.value().empty()) {
+                snake_bot_think(m_snake);
+            }
+            std::cerr << '\n' << m_maze.str_debug(m_snake_bot.solution.value());
+            exit(0);
+            m_snake.head_direction = m_snake_bot.solution.value().front();
+            m_snake_bot.solution.value().pop_front();
         }
-        // TODO: Add support for Bot mode
-        // else if game mode == Bot:
-        //    if solution is not empty:
-        //      input((char)solution.front());
-        //      solution.pop_front();
     } else if (m_snaze_state == SnazeState::Won or m_snaze_state == SnazeState::Lost) {
         m_snaze_state =
             (read_yes_no_confirmation(true)) ? SnazeState::SnazeMode : SnazeState::MainMenu;
     } else if (m_snaze_state == SnazeState::Damage) {
+        if (m_snaze_mode != SnazeMode::Bot) {
+            return;
+        }
+        read_enter_to_proceed();
         /// HACK: Maybe go directly to GameStart, is quite annoying pressing enter
-        // FIX: When in bot mode player should press enter to restart the snake
     } else {
         read_enter_to_proceed();
     }
@@ -88,7 +101,6 @@ void SnazeManager::update() {
         }
     } else if (m_snaze_state == SnazeState::GameStart) {
         m_snaze_state = SnazeState::On;
-        m_maze.random_food_position();
         m_remaining_snake_lives =
             (m_remaining_snake_lives == 0) ? m_settings.lives : m_remaining_snake_lives;
     } else if (m_snaze_state == SnazeState::On) {
@@ -104,10 +116,6 @@ void SnazeManager::update() {
             m_maze.random_food_position();
             ate = true;
         }
-        // TODO: Update: Add support for Bot mode
-        // if game mode == SnazeMode::Bot
-        //    if solution is empty:
-        //        solution = solve(m_maze);
         if (not ate) {
             m_snake.body.pop_back();
         }
@@ -151,7 +159,7 @@ void SnazeManager::render() {
         main_content(game_loop_mc());
     } else if (m_snaze_state == SnazeState::Damage) {
         main_content(game_loop_info() + '\n' + m_maze.str_spawn());
-        interaction_msg("You suffered damage!!! Press <Enter> to continue");
+        interaction_msg("The bot has suffered damage!!! Press <Enter> to continue");
     } else if (m_snaze_state == SnazeState::Won) {
         screen_title("The Snake has found it's way!");
         main_content("This snake badass as fuck fr\n\n");

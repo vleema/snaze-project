@@ -95,6 +95,39 @@ std::string Maze::str_spawn() const {
     return oss.str();
 }
 
+std::string Maze::str_debug(const std::deque<Direction> &solution) const {
+    constexpr char wall_or_body[] = "█";
+    constexpr char free = ' ';
+    constexpr char food[] = "◉";
+    constexpr char head_v[] = "ⸯ";
+    constexpr char head_h[] = "~";
+    std::ostringstream oss;
+    auto maze_copy(m_maze);
+    auto current_pos = start();
+
+    for (const auto &dir : solution) {
+        current_pos = current_pos + dir;
+        maze_copy[current_pos.coord_y][current_pos.coord_x] =
+            (current_pos != m_food) ? Cell::SnakeBody : Cell::SnakeBody;
+    }
+    for (const auto &row : maze_copy) {
+        for (const auto &cell : row) {
+            if (cell == Cell::Free or cell == Cell::InvisibleWall or cell == Cell::Spawn) {
+                oss << free;
+            } else if (cell == Cell::Wall) {
+                oss << Color::tcolor(wall_or_body, Color::GREEN);
+            } else if (cell == Cell::Food) {
+                oss << Color::tcolor(food, Color::MAGENTA);
+            } else if (cell == Cell::SnakeBody) {
+                oss << Color::tcolor(wall_or_body, Color::YELLOW);
+            }
+        }
+        oss << '\n';
+    }
+    oss << '\n';
+    return oss.str();
+}
+
 std::string Maze::str_in_game(const std::deque<Position> &snake_body,
                               const Direction &snake_head_direction) const {
     constexpr char wall_or_body[] = "█";

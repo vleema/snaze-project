@@ -60,9 +60,7 @@ struct Position {
         }
         return *this + offset;
     }
-    Position operator+=(const Direction &dir) const {
-        return *this + dir;
-    }
+    Position operator+=(const Direction &dir) const { return *this + dir; }
     /// 'less than' overload
     bool operator<(const Position &other) const {
         return coord_x < other.coord_x or (coord_x == other.coord_x and coord_y < other.coord_y);
@@ -105,7 +103,7 @@ class Maze {
     [[nodiscard]] bool in_bound(const Position &pos) const {
         return (pos.coord_y < m_height and pos.coord_x < m_width);
     }
-    [[nodiscard]] bool is_wall(const Position& pos) const { 
+    [[nodiscard]] bool is_wall(const Position &pos) const {
         return m_maze[pos.coord_y][pos.coord_x] == Cell::Wall;
     }
     [[nodiscard]] Position start() const { return m_spawn; }
@@ -123,6 +121,7 @@ class Maze {
     //  - snake head: ⸯ (vertical), ~ (horizontal)
     [[nodiscard]] std::string str_in_game(const std::deque<Position> &snake_body,
                                           const Direction &snake_head_direction) const;
+    [[nodiscard]] std::string str_debug(const std::deque<Direction> &solution) const;
     /// Generates a random food position
     void random_food_position();
 

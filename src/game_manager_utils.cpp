@@ -2,6 +2,7 @@
 #include "game_manager.hpp"
 #include "ini_file_parser.h"
 #include "maze.hpp"
+#include "snake.hpp"
 #include "terminal_utils.h"
 #include "utils.hpp"
 
@@ -81,6 +82,16 @@ Direction SnazeManager::input(char keystroke, Direction previous_direction) {
         break;
     }
     return input_result;
+}
+
+void SnazeManager::snake_bot_think(const Snake &snake) {
+    m_snake_bot.solution = SnakeBot::solve(m_maze, snake);
+    if (not m_snake_bot.solution.has_value()) {
+        m_snake_bot.solution = SnakeBot::play_random(m_maze);
+        if (!m_snake_bot.solution.has_value()) {
+            throw std::runtime_error("Something went wrong, while the bot was thinking");
+        }
+    }
 }
 
 //

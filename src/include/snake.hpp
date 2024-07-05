@@ -39,14 +39,16 @@ struct Snake {
 /// Class responsible for finding the shortest path to the finish
 class SnakeBot {
   public:
-    using MaybeDirectionList = std::optional<std::list<Direction>>;
+    using MaybeDirectionDeque = std::optional<std::deque<Direction>>;
     using PositionUSet = std::unordered_set<Position, Position::Hash>;
 
-    /// Method to solve the maze
-    static MaybeDirectionList solve(const Maze &maze, const Snake &snake);
+    MaybeDirectionDeque solution;
 
-    /// Method to print the solution from start to finish
-    static std::string str(const Maze &maze, std::list<Direction> &solution);
+    /// Method to solve the maze
+    static MaybeDirectionDeque solve(const Maze &maze, const Snake &snake);
+
+    /// Method to play the snake randomly, when there's no solution
+    static MaybeDirectionDeque play_random(const Maze &maze);
 
   private:
     /// Method to get the opposite direction
@@ -65,9 +67,9 @@ class SnakeBot {
         }
     }
     /// Method to reconstruct the shorter path from start to the food position
-    static std::list<Direction> reconstruct_path(std::map<Position, Direction> &came_from,
-                                                 Position start, Position end) {
-        std::list<Direction> path;
+    static std::deque<Direction> reconstruct_path(std::map<Position, Direction> &came_from,
+                                                  Position start, Position end) {
+        std::deque<Direction> path;
         Position current = end;
         while (current != start) {
             path.push_front(came_from[current]);
@@ -88,8 +90,6 @@ class SnakeBot {
 
     /// Method that given a position on a maze returns the available moves
     static std::vector<Direction> positions_available(Position current, const Maze &maze);
-    /// Method to play the snake randomly, when there's no solution
-    static MaybeDirectionList play_random(const Maze &maze);
 };
 } // namespace snaze
 #endif // !SNAKE_HPP

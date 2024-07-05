@@ -2,8 +2,8 @@ TA FALTANDO ISO AQ:
     * Fazer o game manager utils (done)
     * Pop-up depois de ter tomado dano
     * Levar em consideração o corpo da cobra na bfs (done)
-    * Process especial do damage quando no modo bot
-    * Suporte para o Bot no Jogo
+    * Process especial do damage quando no modo bot (done)
+    * Suporte para o Bot no Jogo (done)
     * Opção padrão padrão para o yes or no
     * Deixar o render mais bunitinho
     * Ler um arquivo que tem vários mazes

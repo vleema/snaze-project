@@ -131,10 +131,8 @@ class SnazeManager {
     void change_state_by_selected_menu_option();
     /// Verify if all the levels were played
     [[nodiscard]] bool still_levels_available();
-    /// Resets the snake and her dependencies
-    void reset_snake();
-    /// Initializes the snake and her dependencies
-    void initialize_snake();
+    /// Calls the bot for thinking, can throw a exception when there's no solution
+    void snake_bot_think(const Snake &snake);
 
   public:
     /// Constructor
