@@ -87,11 +87,14 @@ std::string Maze::str_symbols() const {
         << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
         << Color::tcolor(food, Color::MAGENTA) << " - Food\n"
         << std::endl;
-    return 
+    return oss.str();
 }
+
 std::string Maze::str_spawn() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
+    constexpr char spawn[] = "꩜";
+    constexpr char food[] = "◉";
     size_t line_length = 50;
     std::ostringstream oss;
     for (const auto &row : m_maze) {
