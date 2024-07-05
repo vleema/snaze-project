@@ -148,13 +148,23 @@ std::string SnazeManager::bot_mode_mc() {
     return oss.str();
 }
 
+std::string line(size_t n) {
+  std::ostringstream oss;
+
+  for(size_t i = 0; i < n; ++i) {
+      oss << "=";
+  }
+  return oss.str();
+}
+
 std::string SnazeManager::game_loop_info() const {
     // ♥︎ ☠
     constexpr char heart[] = "♥︎";
     constexpr char skull[] = "☠";
     std::ostringstream header_oss;
     std::ostringstream padding_oss;
-    header_oss << "Lives: ";
+    size_t line_length = 50;
+    header_oss << line(line_length) << std::endl << "Lives: ";
     for (size_t i = 0; i < m_remaining_snake_lives; ++i) {
         header_oss << " " << heart;
     }
@@ -162,7 +172,7 @@ std::string SnazeManager::game_loop_info() const {
         header_oss << " " << skull;
     }
     header_oss << " | Score: 0 | Food eaten " << m_eaten_food_amount_snake << " of "
-               << m_settings.food_amount;
+               << m_settings.food_amount << std::endl << line(line_length) << std::endl;
     auto header_str = header_oss.str();
     padding_oss << std::setw((int)header_str.size()) << std::setfill('-');
     return header_str;
@@ -173,6 +183,17 @@ std::string SnazeManager::game_loop_mc() const {
     oss << game_loop_info() << '\n';
     oss << m_maze.str_in_game(m_snake.body, m_snake.head_direction);
     // TODO: Add multiples '-' before the maze
+
+    return oss.str();
+}
+
+std::string SnazeManager::controls_im() const {
+    std::ostringstream oss;
+    oss << "Press the following keys to play: " << std::endl
+        << "W - UP" << std::endl
+        << "S - DOWN " << std::endl
+        << "D - RIGHT " << std::endl
+        << "A - LEFT" << std::endl;
 
     return oss.str();
 }

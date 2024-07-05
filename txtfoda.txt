@@ -5,5 +5,6 @@ TA FALTANDO ISO AQ:
     * Process especial do damage quando no modo bot
     * Suporte para o Bot no Jogo
     * Opção padrão padrão para o yes or no
-    * Deixar o render mais bunitinho
+    * Deixar o render mais bunitinho(done)
+    * Ajeitar a tela de morte
     * Ler um arquivo que tem vários mazes

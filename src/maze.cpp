@@ -70,14 +70,27 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
     // TODO: Functionality to read a file with multiple levels
 }
 
+std::string line(size_t n) {
+  std::ostringstream oss;
+
+  for(size_t i = 0; i < n; ++i) {
+      oss << "=";
+  }
+  return oss.str();
+}
+
 std::string Maze::str_spawn() const {
     constexpr char wall[] = "█";
     constexpr char free = ' ';
     constexpr char spawn[] = "꩜";
     constexpr char food[] = "◉";
+    size_t line_length = 43;
     std::ostringstream oss;
-    oss << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
-        << Color::tcolor(food, Color::MAGENTA) << " - Food\n";
+    oss << std::endl << line(line_length) << std::endl;
+    oss << std::endl
+        << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
+        << Color::tcolor(food, Color::MAGENTA) << " - Food\n"
+        << std::endl;
     for (const auto &row : m_maze) {
         for (const auto &cell : row) {
             if (cell == Cell::Free or cell == Cell::InvisibleWall) {
@@ -92,6 +105,8 @@ std::string Maze::str_spawn() const {
         }
         oss << '\n';
     }
+
+    oss << std::endl << line(line_length) << std::endl;
     return oss.str();
 }
 
