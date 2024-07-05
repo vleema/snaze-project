@@ -71,12 +71,12 @@ Maze::Maze(const std::string &filename) : m_spawn(0, 0), m_food(0, 0) {
 }
 
 std::string line(size_t n) {
-  std::ostringstream oss;
+    std::ostringstream oss;
 
-  for(size_t i = 0; i < n; ++i) {
-      oss << "=";
-  }
-  return oss.str();
+    for (size_t i = 0; i < n; ++i) {
+        oss << "=";
+    }
+    return oss.str();
 }
 
 std::string Maze::str_spawn() const {
@@ -110,7 +110,7 @@ std::string Maze::str_spawn() const {
     return oss.str();
 }
 
-std::string Maze::str_debug(const std::deque<Direction> &solution) const {
+std::string Maze::str_debug(const std::deque<Direction> &solution, const Position &pos) const {
     constexpr char wall_or_body[] = "█";
     constexpr char free = ' ';
     constexpr char food[] = "◉";
@@ -118,7 +118,7 @@ std::string Maze::str_debug(const std::deque<Direction> &solution) const {
     constexpr char head_h[] = "~";
     std::ostringstream oss;
     auto maze_copy(m_maze);
-    auto current_pos = start();
+    auto current_pos = pos;
 
     for (const auto &dir : solution) {
         current_pos = current_pos + dir;

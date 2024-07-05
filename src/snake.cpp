@@ -7,7 +7,6 @@
 #include <utility>
 namespace snaze {
 SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &snake) {
-    // TODO: Account for snake body
     std::queue<std::pair<Position, Snake>> to_visit;
     std::unordered_set<Position, Position::Hash> meta_visited;
     std::map<Position, Direction> came_from;
@@ -23,6 +22,9 @@ SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &sna
             return reconstruct_path(came_from, start_pos, current_pos);
         }
         for (const auto &dir : directions) {
+            if (dir == opposite(current_snake.head_direction)) {
+                continue;
+            }
             Snake next_snake = current_snake;
             next_snake.move_snake(dir);
             auto next_pos = next_snake.body.front();
@@ -43,8 +45,9 @@ SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &sna
 std::vector<Direction> SnakeBot::positions_available(const Maze &maze, const Snake &snake) {
     std::vector<Direction> moves;
     for (const auto &dir : {Direction::Up, Direction::Down, Direction::Right, Direction::Left}) {
-        if (maze.blocked(snake.body.front(), dir) &&
-            snake.is_snake_body(snake.body.front() + dir)) {
+        if ((maze.blocked(snake.body.front(), dir) and
+             snake.is_snake_body(snake.body.front() + dir)) or
+            dir == opposite(snake.head_direction)) {
             continue;
         }
         moves.push_back(dir);

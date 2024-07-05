@@ -121,7 +121,8 @@ class Maze {
     //  - snake head: ⸯ (vertical), ~ (horizontal)
     [[nodiscard]] std::string str_in_game(const std::deque<Position> &snake_body,
                                           const Direction &snake_head_direction) const;
-    [[nodiscard]] std::string str_debug(const std::deque<Direction> &solution) const;
+    [[nodiscard]] std::string str_debug(const std::deque<Direction> &solution,
+                                        const Position &pos) const;
     /// Generates a random food position
     void random_food_position();
 
