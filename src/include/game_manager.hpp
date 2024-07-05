@@ -105,6 +105,8 @@ class SnazeManager {
     [[nodiscard]] static std::string snaze_mode_mc();
     /// BotMode screen
     [[nodiscard]] static std::string bot_mode_mc();
+    // Controls interaction message
+    [[nodiscard]] std::string controls_im() const;
     /// It renders the remaining lives and pontuation of the player
     [[nodiscard]] std::string game_loop_info() const;
     /// It renders the snake with the maze

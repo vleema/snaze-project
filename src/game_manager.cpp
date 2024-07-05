@@ -152,7 +152,7 @@ void SnazeManager::render() {
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
         main_content(m_maze.str_spawn());
-        interaction_msg(R"(Controls: "w" - UP "s" - DOWN "d" - RIGHT "a" - LEFT)");
+        interaction_msg(controls_im());
     } else if (m_snaze_state == SnazeState::On) {
         main_content(game_loop_mc());
     } else if (m_snaze_state == SnazeState::Damage) {
