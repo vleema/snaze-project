@@ -156,7 +156,7 @@ void SnazeManager::render() {
         main_content(bot_mode_mc());
         interaction_msg("Select one option and press enter");
     } else if (m_snaze_state == SnazeState::GameStart) {
-        main_content(m_maze.str_spawn());
+        main_content(m_maze.str_symbols() + game_loop_info() + m_maze.str_spawn());
         interaction_msg(controls_im());
     } else if (m_snaze_state == SnazeState::On) {
         main_content(game_loop_mc());

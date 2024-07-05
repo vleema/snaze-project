@@ -79,18 +79,21 @@ std::string line(size_t n) {
     return oss.str();
 }
 
-std::string Maze::str_spawn() const {
-    constexpr char wall[] = "█";
-    constexpr char free = ' ';
+std::string Maze::str_symbols() const {
+    std::ostringstream oss;
     constexpr char spawn[] = "꩜";
     constexpr char food[] = "◉";
-    size_t line_length = 43;
-    std::ostringstream oss;
-    oss << std::endl << line(line_length) << std::endl;
     oss << std::endl
         << Color::tcolor(spawn, Color::YELLOW) << " - Spawn\n"
         << Color::tcolor(food, Color::MAGENTA) << " - Food\n"
         << std::endl;
+    return 
+}
+std::string Maze::str_spawn() const {
+    constexpr char wall[] = "█";
+    constexpr char free = ' ';
+    size_t line_length = 50;
+    std::ostringstream oss;
     for (const auto &row : m_maze) {
         for (const auto &cell : row) {
             if (cell == Cell::Free or cell == Cell::InvisibleWall) {

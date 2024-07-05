@@ -115,6 +115,7 @@ class Maze {
         auto move = pos + dir;
         return in_bound(move) and m_maze[move.coord_y][move.coord_x] == Cell::Wall;
     }
+    std::string str_symbols() const;
     /// Method to append the Maze to string, only showing the spawn position
     [[nodiscard]] std::string str_spawn() const;
     /// Method to append the Maze to string, showing the snake

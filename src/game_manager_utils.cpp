@@ -193,7 +193,6 @@ std::string SnazeManager::game_loop_mc() const {
     std::ostringstream oss;
     oss << game_loop_info() << '\n';
     oss << m_maze.str_in_game(m_snake.body, m_snake.head_direction);
-    // TODO: Add multiples '-' before the maze
 
     return oss.str();
 }
