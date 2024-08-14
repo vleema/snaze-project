@@ -33,7 +33,7 @@ void SnazeManager::process() {
             m_snake.body.push_front(m_maze.start());
             snake_bot_think(m_snake);
             /*std::cerr << '\n'*/
-                      /*<< m_maze.str_debug(m_snake_bot.solution.value(), m_snake.body.front());*/
+            /*<< m_maze.str_debug(m_snake_bot.solution.value(), m_snake.body.front());*/
             /*std::this_thread::sleep_for(std::chrono::milliseconds(3000));*/
             // exit(0);
             return;
@@ -50,9 +50,10 @@ void SnazeManager::process() {
         } else if (m_snaze_mode == SnazeMode::Bot) {
             if (m_snake_bot.solution.has_value() and m_snake_bot.solution.value().empty()) {
                 snake_bot_think(m_snake);
-                /*std::cerr << '\n'*/
-                /*          << m_maze.str_debug(m_snake_bot.solution.value(), m_snake.body.front());*/
-                /*std::this_thread::sleep_for(std::chrono::milliseconds(3000));*/
+                // std::cerr << '\n'
+                //           << m_maze.str_debug(m_snake_bot.solution.value(),
+                //           m_snake.body.front());
+                // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
             }
             m_snake.head_direction = m_snake_bot.solution.value().front();
             m_snake_bot.solution.value().pop_front();

@@ -31,7 +31,7 @@ SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &sna
             if (next_snake.is_snake_body(next_pos)) {
                 continue;
             }
-            if (maze.in_bound(next_pos) and not(maze.blocked(current_pos, dir)) and
+            if (maze.in_bound(next_pos) and not(maze.blocked(next_pos, Direction::None)) and
                 not already_visited(next_pos, meta_visited)) {
                 came_from[next_pos] = dir;
                 to_visit.push({next_pos, next_snake});
@@ -45,9 +45,8 @@ SnakeBot::MaybeDirectionDeque SnakeBot::solve(const Maze &maze, const Snake &sna
 std::vector<Direction> SnakeBot::positions_available(const Maze &maze, const Snake &snake) {
     std::vector<Direction> moves;
     for (const auto &dir : {Direction::Up, Direction::Down, Direction::Right, Direction::Left}) {
-        if ((maze.blocked(snake.body.front(), dir) and
-             snake.is_snake_body(snake.body.front() + dir)) or
-            dir == opposite(snake.head_direction)) {
+        if ((maze.blocked(snake.body.front(), dir) or
+             snake.is_snake_body(snake.body.front() + dir))) {
             continue;
         }
         moves.push_back(dir);
